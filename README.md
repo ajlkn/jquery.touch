@@ -6,21 +6,21 @@ Requires jQuery 1.7+. Tested on Android (latest), iOS (latest), Firefox, Chrome,
 
 ## Usage
 
-1. Load it after jQuery:
+Load it after jQuery:
 
 ```html
 <script src="http://code.jquery.com/jquery-x.x.x.min.js"></script>
 <script src="jquery.touch.js"></script>
 ```
 
-2. Use enableTouch() to add touch gesture events to a selector:
+Use enableTouch() to add touch gesture events to a selector:
 
 ```js
 var foo = $('.foo');
 foo.enableTouch();
 ```
 
-3. Bind stuff like you normally would:
+Bind stuff like you normally would:
 
 ```js
 foo
