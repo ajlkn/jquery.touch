@@ -10,7 +10,7 @@ Load it after jQuery:
 
 ```html
 <script src="http://code.jquery.com/jquery-x.x.x.min.js"></script>
-<script src="jquery.touch.js"></script>
+<script src="jquery.touch.min.js"></script>
 ```
 
 Use enableTouch() to add touch gesture events to a selector:
