@@ -7,13 +7,13 @@
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		var defaultSettings = {
-			useTapAndHold:		false,		// If true, enable tapAndHold event
-			useMouse:			true,		// If true, mouse clicks and movements will also trigger touch events
-			dragThreshold:		10,			// Distance from tap to register a drag (lower = more sensitive, higher = less sensitive)
-			swipeThreshold:		30,			// Distance from tap to register a swipe (lower = more sensitive, higher = less sensitive)
-			tapLimit:			2,			// Maximum number of taps allowed by "tap"
-			tapDelay:			250,		// Delay between taps
-			tapAndHoldDelay:	1000		// Time to wait before triggering "tapAndHold"
+			useTapAndHold:		false,	// If true, enable tapAndHold event
+			useMouse:		true,	// If true, mouse clicks and movements will also trigger touch events
+			dragThreshold:		10,	// Distance from tap to register a drag (lower = more sensitive, higher = less sensitive)
+			swipeThreshold:		30,	// Distance from tap to register a swipe (lower = more sensitive, higher = less sensitive)
+			tapLimit:		2,	// Maximum number of taps allowed by "tap"
+			tapDelay:		250,	// Delay between taps
+			tapAndHoldDelay:	1000	// Time to wait before triggering "tapAndHold"
 		};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
