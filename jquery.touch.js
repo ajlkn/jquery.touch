@@ -9,22 +9,23 @@
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		var defaultSettings = {
-			useTapAndHold:		false,	// If true, enable tapAndHold event
-			useDrag:		false,	// If true, enable drag events
 			useMouse:		true,	// If true, mouse clicks and movements will also trigger touch events
 			dragThreshold:		10,	// Distance from tap to register a drag (lower = more sensitive, higher = less sensitive)
-			dragDelay: 		100,	// Time to wait before registering a drag (needs to be high enough to not interfere with scrolling)
+			dragDelay: 		200,	// Time to wait before registering a drag (needs to be high enough to not interfere with scrolling)
 			swipeThreshold:		30,	// Distance from tap to register a swipe (lower = more sensitive, higher = less sensitive)
-			tapLimit:		2,	// Maximum number of taps allowed by "tap"
 			tapDelay:		250,	// Delay between taps
-			tapAndHoldDelay:	1000	// Time to wait before triggering "tapAndHold"
+			tapAndHoldDelay:	750,	// Time to wait before triggering "tapAndHold"
+			allowDefault: {			// (experimental) Selectively allow default behavior for specific classes of gesture events
+				swipe: 		false,
+				drag: 		false
+			}
 		};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// touchJS Class
+	// touch Class
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		function touchJS(element, userSettings)
+		function touch(element, userSettings)
 		{
 
 			var t = this;
@@ -41,18 +42,23 @@
 				t.timerTap = null;
 				t.timerTapAndHold = null;
 				t.tapScrollTop = null;
+				t.mouseDown = false;
 				t.x = null;
 				t.y = null;
 				t.ex = null;
 				t.ey = null;
 				t.taps = 0;
-			
+
+			// Hack: Turn off useMouse if the device supports touch events. Temporary solution, as this may break things in environments with mixed input types (mouse + touch).
+				if (!!('ontouchstart' in window))
+					t.settings.useMouse = false;
+					
 			// Init
 				t.init();
 
 		}
 
-		touchJS.prototype.init = function()
+		touch.prototype.init = function()
 		{
 
 			var t = this;
@@ -61,8 +67,6 @@
 				t.element
 					.on('touchstart', function(e) {
 
-						e.stopPropagation();
-					
 						t.doStart(
 							e,
 							e.originalEvent.touches[0].pageX,
@@ -72,8 +76,6 @@
 					})
 					.on('touchmove', function(e) {
 						
-						e.stopPropagation();
-
 						t.doMove(
 							e,
 							e.originalEvent.changedTouches[0].pageX,
@@ -83,8 +85,6 @@
 					})
 					.on('touchend', function(e) {
 					
-						e.stopPropagation();
-
 						t.doEnd(
 							e,
 							e.originalEvent.changedTouches[0].pageX,
@@ -101,8 +101,6 @@
 					t.element
 						.on('mousedown', function(e) {
 							
-							e.stopPropagation();
-
 							t.mouseDown = true;
 							
 							t.doStart(
@@ -114,8 +112,6 @@
 						})
 						.on('mousemove', function(e) {
 
-							e.stopPropagation();
-
 							if (t.mouseDown)
 							{
 								t.doMove(
@@ -126,29 +122,57 @@
 							}
 
 						})
-						.on('mouseup mouseleave', function(e) {
+						.on('mouseup', function(e) {
 
-							e.stopPropagation();
-
-							t.mouseDown = false;
-							
 							t.doEnd(
 								e,
 								e.pageX,
 								e.pageY
 							);
 
+							t.mouseDown = false;
+							
 						});
 				}
 
-		}
-		
-		touchJS.prototype.scrolled = function()
-		{
-			return (this.tapScrollTop != d.scrollTop());
 		};
 		
-		touchJS.prototype.cancel = function()
+		touch.prototype.uses = function(x)
+		{
+
+			var events = $._data(this.element[0], 'events');
+			
+			switch (x)
+			{
+				case 'swipe':
+					return (events.hasOwnProperty(x) || events.hasOwnProperty('swipeUp') || events.hasOwnProperty('swipeDown') || events.hasOwnProperty('swipeLeft') || events.hasOwnProperty('swipeRight'));
+					
+				case 'drag':
+					return (events.hasOwnProperty(x) || events.hasOwnProperty('dragStart') || events.hasOwnProperty('dragEnd'));
+					
+				case 'tapAndHold':
+				case 'doubleTap':
+					return events.hasOwnProperty(x);
+				
+				case 'tap':
+					return (events.hasOwnProperty(x) || events.hasOwnProperty('doubleTap') || events.hasOwnProperty('tapAndHold'));
+				
+				default:
+					break;
+			}
+			
+			return false;
+
+		};
+		
+		touch.prototype.scrolled = function()
+		{
+
+			return (this.tapScrollTop != d.scrollTop());
+
+		};
+		
+		touch.prototype.cancel = function(mouseDown)
 		{
 
 			var t = this;
@@ -159,14 +183,31 @@
 			t.tapStart = null;
 			t.dragStart = null;
 
+			if (mouseDown)
+				t.mouseDown = false;
+
 		};
 
-		touchJS.prototype.doStart = function(e, x, y)
+		touch.prototype.doStart = function(e, x, y)
 		{
 
 			var t = this,
 				offset = t.element.offset();
-		
+
+			// Prevent original event from bubbling
+				e.stopPropagation();
+
+			// Prevent default if the element has a swipe or drag event (and the user hasn't manually overriden this behavior with "allowDefault")
+				if (	(t.uses('swipe') && !t.settings.allowDefault.swipe)
+				||	(t.uses('drag') && !t.settings.allowDefault.drag))
+					e.preventDefault();
+
+			// Hack: Clear touch callout/user select stuff on Webkit if the element has a tapAndHold event
+				if (t.uses('tapAndHold'))
+					t.element
+						.css('-webkit-touch-callout', 'none')
+						.css('-webkit-user-select', 'none');
+					
 			// Set x, y, ex, ey
 				t.x = x;
 				t.y = y;
@@ -190,8 +231,6 @@
 							// In a valid tap? Trigger "tap"
 								if (t.inTap && t.taps > 0)
 								{
-									e.preventDefault();
-								
 									t.element.trigger(
 										(t.taps == 2 ? 'doubleTap' : 'tap'),
 										{
@@ -214,48 +253,57 @@
 					
 				// tapAndHold
 					
-					// Stop existing timer
-						window.clearTimeout(t.timerTapAndHold);
+					if (t.uses('tapAndHold'))
+					{
+						// Stop existing timer
+							window.clearTimeout(t.timerTapAndHold);
 
-					// Set new timer
-						t.timerTapAndHold = window.setTimeout(function() {
-						
-							// Use tapAndHold and in a valid tap? Trigger "tapAndHold"
-								if (t.settings.useTapAndHold && t.inTap)
-								{
-									e.preventDefault();
+						// Set new timer
+							t.timerTapAndHold = window.setTimeout(function() {
+							
+								// Use tapAndHold and in a valid tap? Trigger "tapAndHold"
+									if (t.inTap)
+									{
+										t.element.trigger(
+											'tapAndHold', 
+											{ 
+												'x': t.x, 
+												'y': t.y, 
+												'ex': t.ex, 
+												'ey': t.ey, 
+												'duration': Date.now() - t.tapStart 
+											}
+										);
+										
+										t.cancel();
+									}
 
-									t.element.trigger(
-										'tapAndHold', 
-										{ 
-											'x': t.x, 
-											'y': t.y, 
-											'ex': t.ex, 
-											'ey': t.ey, 
-											'duration': Date.now() - t.tapStart 
-										}
-									);
-									
-									t.cancel();
-								}
-
-							// Clear tapAndHold timer
-								t.timerTapAndHold = null;
-						
-						}, t.settings.tapAndHoldDelay);
+								// Clear tapAndHold timer
+									t.timerTapAndHold = null;
+							
+							}, t.settings.tapAndHoldDelay);
+					}
 				
 			// We're now in a tap
 				t.inTap = true;
 
 		};
 		
-		touchJS.prototype.doMove = function(e, x, y)
+		touch.prototype.doMove = function(e, x, y)
 		{
 		
 			var	t = this,
 				offset = t.element.offset(),
 				diff = (Math.abs(t.x - x) + Math.abs(t.y - y)) / 2;
 
+			// Prevent original event from bubbling
+				e.stopPropagation();
+
+			// Prevent default if the element has a swipe or drag event (and the user hasn't manually overriden this behavior with "allowDefault")
+				if (	(t.uses('swipe') && !t.settings.allowDefault.swipe)
+				||	(t.uses('drag') && !t.settings.allowDefault.drag))
+					e.preventDefault();
+					
 			// Scrolled? Bail.
 				if (t.scrolled())
 				{
@@ -265,9 +313,6 @@
 			
 			// In a drag? Trigger "drag"
 				if (t.inDrag)
-				{
-					e.preventDefault();
-
 					t.element.trigger(
 						'drag', 
 						{ 
@@ -277,7 +322,6 @@
 							'ey': y - offset.top
 						}
 					);
-				}
 			
 			// If we've moved past the drag threshold ...
 				else if (diff > t.settings.dragThreshold)
@@ -298,9 +342,11 @@
 					// Set timestamp
 						t.dragStart = Date.now();
 					
+					// Prevent default if the element has a drag event
+						if (t.uses('drag'))
+							e.preventDefault();
+					
 					// Trigger "dragStart"
-						e.preventDefault();
-
 						t.element.trigger(
 							'dragStart', 
 							{ 
@@ -314,7 +360,7 @@
 
 		};
 
-		touchJS.prototype.doEnd = function(e, x, y)
+		touch.prototype.doEnd = function(e, x, y)
 		{
 		
 			var	t = this,
@@ -324,6 +370,9 @@
 				distance,
 				velocity,
 				duration;
+
+			// Prevent original event from bubbling
+				e.stopPropagation();
 
 			// Scrolled? Bail.
 				if (t.scrolled())
@@ -338,11 +387,11 @@
 					// Increase the tap count
 						t.taps++;
 					
-					// If the tap timer expired, or if we have more than one tap, trigger tap event
-						if (!t.timerTap || t.taps >= t.settings.tapLimit)
+					// Did we hit an end tap condition?
+						if	(!t.timerTap				// Timer ran out?
+						||	(t.taps == 1 && !t.uses('doubleTap'))	// Got one tap (and the element doesn't have a doubleTap event)?
+						||	(t.taps == 2 && t.uses('doubleTap')))	// Got two taps (and the element does have a doubleTap event)?
 						{
-							e.preventDefault();
-
 							t.element.trigger(
 								(t.taps == 2 ? 'doubleTap' : 'tap'),
 								{ 
@@ -369,8 +418,6 @@
 						velocity = distance / duration;
 
 					// Trigger "dragEnd"
-						e.preventDefault();
-
 						t.element.trigger(
 							'dragEnd', 
 							{
@@ -398,8 +445,6 @@
 						{
 						
 							// Trigger "swipe"
-								e.preventDefault();
-
 								t.element.trigger(
 									'swipe', 
 									{ 
@@ -480,14 +525,21 @@
 
 		$.fn.enableTouch = function(userSettings) {
 
+			var	element, o;
+				
 			// Handle multiple elements
 				if (this.length > 1)
 					for (var i=0; i < this.length; i++)
 						$(this[i]).enableTouch();
 
-			// Get this party started
-				var	element = $(this),
-					o = new touchJS(element, userSettings);
+			// Create jQuery object
+				element = $(this);
+
+			// Create touch object
+				o = new touch(element, userSettings);
+				
+			// Expose touch object via the original DOM element
+				element.get(0)._touch = o;
 
 			return element;
 

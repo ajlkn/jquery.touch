@@ -47,17 +47,16 @@ And that's about it.
 
 ## Config
 
-enableTouch() can optionally take a config to override some or all of the following defaults= settings:
+enableTouch() can optionally take a config to override some or all of the following defaults:
 
 ```js
 foo.enableTouch({
-	useTapAndHold:		false,		// If true, enable tapAndHold event
-	useMouse:			true,		// If true, mouse clicks and movements will also trigger touch events
-	dragThreshold:		10,			// Distance from tap to register a drag (lower = more sensitive, higher = less sensitive)
-	swipeThreshold:		30,			// Distance from tap to register a swipe (lower = more sensitive, higher = less sensitive)
-	tapLimit:			2,			// Maximum number of taps allowed by "tap"
-	tapDelay:			250,		// Delay between taps
-	tapAndHoldDelay:	1000		// Time to wait before triggering "tapAndHold"
+	useMouse:			true,	// If true, mouse clicks and movements will also trigger touch events
+	dragThreshold:		10,		// Distance from tap to register a drag (lower = more sensitive, higher = less sensitive)
+	dragDelay: 			200,	// Time to wait before registering a drag (needs to be high enough to not interfere with scrolling)
+	swipeThreshold:		30,		// Distance from tap to register a swipe (lower = more sensitive, higher = less sensitive)
+	tapDelay:			250,	// Delay between taps
+	tapAndHoldDelay:	750		// Time to wait before triggering "tapAndHold"
 });
 ```
 
