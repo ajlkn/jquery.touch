@@ -1,4 +1,4 @@
-/* jquery.touch.js v0.1 | (c) n33 | n33.co | MIT licensed */
+/* jquery.touch.js v0.2 | (c) n33 | n33.co | MIT licensed */
 
 (function($) {
 
