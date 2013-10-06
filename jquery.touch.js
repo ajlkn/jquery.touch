@@ -10,6 +10,7 @@
 		
 		var defaultSettings = {
 			useTapAndHold:		false,	// If true, enable tapAndHold event
+			useDrag:		false,	// If true, enable drag events
 			useMouse:		true,	// If true, mouse clicks and movements will also trigger touch events
 			dragThreshold:		10,	// Distance from tap to register a drag (lower = more sensitive, higher = less sensitive)
 			dragDelay: 		100,	// Time to wait before registering a drag (needs to be high enough to not interfere with scrolling)
@@ -59,6 +60,8 @@
 			// Bind touch events
 				t.element
 					.on('touchstart', function(e) {
+
+						e.stopPropagation();
 					
 						t.doStart(
 							e,
@@ -69,6 +72,8 @@
 					})
 					.on('touchmove', function(e) {
 						
+						e.stopPropagation();
+
 						t.doMove(
 							e,
 							e.originalEvent.changedTouches[0].pageX,
@@ -78,6 +83,8 @@
 					})
 					.on('touchend', function(e) {
 					
+						e.stopPropagation();
+
 						t.doEnd(
 							e,
 							e.originalEvent.changedTouches[0].pageX,
@@ -94,6 +101,8 @@
 					t.element
 						.on('mousedown', function(e) {
 							
+							e.stopPropagation();
+
 							t.mouseDown = true;
 							
 							t.doStart(
@@ -104,6 +113,8 @@
 						
 						})
 						.on('mousemove', function(e) {
+
+							e.stopPropagation();
 
 							if (t.mouseDown)
 							{
@@ -116,6 +127,8 @@
 
 						})
 						.on('mouseup mouseleave', function(e) {
+
+							e.stopPropagation();
 
 							t.mouseDown = false;
 							
