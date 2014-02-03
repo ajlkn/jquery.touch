@@ -16,8 +16,9 @@
 			tapDelay:		250,	// Delay between taps
 			tapAndHoldDelay:	750,	// Time to wait before triggering "tapAndHold"
 			allowDefault: {			// (experimental) Selectively allow default behavior for specific classes of gesture events
+				drag: 		false,
 				swipe: 		false,
-				drag: 		false
+				tap: 		false
 			}
 		};
 
@@ -198,8 +199,9 @@
 				e.stopPropagation();
 
 			// Prevent default if the element has a swipe or drag event (and the user hasn't manually overriden this behavior with "allowDefault")
-				if (	(t.uses('swipe') && !t.settings.allowDefault.swipe)
-				||	(t.uses('drag') && !t.settings.allowDefault.drag))
+				if ((t.uses('drag') && !t.settings.allowDefault.drag)
+				||	(t.uses('swipe') && !t.settings.allowDefault.swipe)
+				||	(t.uses('tap') && !t.settings.allowDefault.tap))
 					e.preventDefault();
 
 			// Hack: Clear touch callout/user select stuff on Webkit if the element has a tapAndHold event
