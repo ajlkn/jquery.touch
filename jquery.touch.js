@@ -1,4 +1,4 @@
-/* jquery.touch.js v0.2.1 | (c) n33 | n33.co | MIT licensed */
+/* jquery.touch.js v0.2.2 | (c) n33 | n33.co | MIT licensed */
 
 (function($) {
 
@@ -9,16 +9,17 @@
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		var defaultSettings = {
-			useMouse:		true,	// If true, mouse clicks and movements will also trigger touch events
-			dragThreshold:		10,	// Distance from tap to register a drag (lower = more sensitive, higher = less sensitive)
-			dragDelay: 		200,	// Time to wait before registering a drag (needs to be high enough to not interfere with scrolling)
-			swipeThreshold:		30,	// Distance from tap to register a swipe (lower = more sensitive, higher = less sensitive)
-			tapDelay:		250,	// Delay between taps
+			useMouse:			true,	// If true, mouse clicks and movements will also trigger touch events
+			noClick:			false,	// Disables "click" event (prevents both "tap" and "click" firing on certain elements like <label>)
+			dragThreshold:		10,		// Distance from tap to register a drag (lower = more sensitive, higher = less sensitive)
+			dragDelay: 			200,	// Time to wait before registering a drag (needs to be high enough to not interfere with scrolling)
+			swipeThreshold:		30,		// Distance from tap to register a swipe (lower = more sensitive, higher = less sensitive)
+			tapDelay:			250,	// Delay between taps
 			tapAndHoldDelay:	750,	// Time to wait before triggering "tapAndHold"
-			allowDefault: {			// (experimental) Selectively allow default behavior for specific classes of gesture events
-				drag: 		false,
-				swipe: 		false,
-				tap: 		false
+			allowDefault: {				// (experimental) Selectively allow default behavior for specific classes of gesture events
+				drag: 			false,
+				swipe: 			false,
+				tap: 			false
 			}
 		};
 
@@ -32,7 +33,9 @@
 			var t = this;
 
 			// Settings
-				t.settings = $.extend(defaultSettings, userSettings);
+				t.settings = {};
+				t.settings = $.extend(t.settings, defaultSettings);
+				t.settings = $.extend(t.settings, userSettings);
 
 			// Properties
 				t.element = element;
@@ -63,7 +66,15 @@
 		{
 
 			var t = this;
-		
+
+			// Disable click event?
+			// Needed for some elements, otherwise "click" triggers in addition to "tap".
+				if (t.settings.noClick)
+					t.element
+						.on('click', function(e) {
+							e.preventDefault();
+						});
+
 			// Bind touch events
 				t.element
 					.on('touchstart', function(e) {
@@ -98,7 +109,7 @@
 				if (t.settings.useMouse)
 				{
 					t.mouseDown = false;
-					
+
 					t.element
 						.on('mousedown', function(e) {
 							
@@ -528,7 +539,7 @@
 		$.fn.enableTouch = function(userSettings) {
 
 			var	element, o;
-				
+
 			// Handle multiple elements
 				if (this.length > 1)
 					for (var i=0; i < this.length; i++)
