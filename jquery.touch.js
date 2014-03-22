@@ -1,4 +1,4 @@
-/* jquery.touch.js v0.2.2 | (c) n33 | n33.co | MIT licensed */
+/* jquery.touch.js v0.2.3 | (c) n33 | n33.co | MIT licensed */
 
 (function($) {
 
@@ -541,9 +541,14 @@
 			var	element, o;
 
 			// Handle multiple elements
-				if (this.length > 1)
+				if (this.length > 1) {
+					
 					for (var i=0; i < this.length; i++)
 						$(this[i]).enableTouch();
+					
+					return $(this);
+					
+				}
 
 			// Create jQuery object
 				element = $(this);
