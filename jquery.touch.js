@@ -1,4 +1,4 @@
-/* jquery.touch.js v0.2.3 | (c) n33 | n33.co | MIT licensed */
+/* jquery.touch.js v0.2.4-dev | (c) n33 | n33.co | MIT licensed */
 
 (function($) {
 
@@ -9,26 +9,42 @@
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		var defaultSettings = {
-			useMouse:			true,	// If true, mouse clicks and movements will also trigger touch events
-			noClick:			false,	// Disables "click" event (prevents both "tap" and "click" firing on certain elements like <label>)
-			dragThreshold:		10,		// Distance from tap to register a drag (lower = more sensitive, higher = less sensitive)
-			dragDelay: 			200,	// Time to wait before registering a drag (needs to be high enough to not interfere with scrolling)
-			swipeThreshold:		30,		// Distance from tap to register a swipe (lower = more sensitive, higher = less sensitive)
-			tapDelay:			250,	// Delay between taps
-			tapAndHoldDelay:	750,	// Time to wait before triggering "tapAndHold"
-			allowDefault: {				// (experimental) Selectively allow default behavior for specific classes of gesture events
-				drag: 			false,
-				swipe: 			false,
-				tap: 			false
-			}
+			
+			// If true, mouse clicks and movements will also trigger touch events.
+				useMouse: true,	
+			
+			// Disables "click" event (prevents both "tap" and "click" firing on certain elements like <label>).
+				noClick: false,
+			
+			// Distance from tap to register a drag (lower = more sensitive, higher = less sensitive).
+				dragThreshold: 10,
+			
+			// Time to wait before registering a drag (needs to be high enough to not interfere with scrolling).
+				dragDelay: 200,
+			
+			// Distance from tap to register a swipe (lower = more sensitive, higher = less sensitive).
+				swipeThreshold: 30,
+			
+			// Delay between taps.
+				tapDelay: 250,
+			
+			// Time to wait before triggering "tapAndHold".
+				tapAndHoldDelay: 750,
+			
+			// (experimental) Selectively allow default behavior for specific classes of gesture events.
+				allowDefault: {
+					drag: true,
+					swipe: true,
+					tap: true
+				}
+
 		};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// touch Class
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		function touch(element, userSettings)
-		{
+		function touch(element, userSettings) {
 
 			var t = this;
 
@@ -62,8 +78,7 @@
 
 		}
 
-		touch.prototype.init = function()
-		{
+		touch.prototype.init = function() {
 
 			var t = this;
 
@@ -106,8 +121,8 @@
 					});
 
 			// If useMouse is enabled, bind mouse events as well
-				if (t.settings.useMouse)
-				{
+				if (t.settings.useMouse) {
+					
 					t.mouseDown = false;
 
 					t.element
@@ -149,13 +164,12 @@
 
 		};
 		
-		touch.prototype.uses = function(x)
-		{
+		touch.prototype.uses = function(x) {
 
 			var events = $._data(this.element[0], 'events');
 			
-			switch (x)
-			{
+			switch (x) {
+			
 				case 'swipe':
 					return (events.hasOwnProperty(x) || events.hasOwnProperty('swipeUp') || events.hasOwnProperty('swipeDown') || events.hasOwnProperty('swipeLeft') || events.hasOwnProperty('swipeRight'));
 					
@@ -171,21 +185,18 @@
 				
 				default:
 					break;
+			
 			}
 			
 			return false;
 
 		};
 		
-		touch.prototype.scrolled = function()
-		{
-
+		touch.prototype.scrolled = function() {
 			return (this.tapScrollTop != d.scrollTop());
-
 		};
 		
-		touch.prototype.cancel = function(mouseDown)
-		{
+		touch.prototype.cancel = function(mouseDown) {
 
 			var t = this;
 		
@@ -200,8 +211,7 @@
 
 		};
 
-		touch.prototype.doStart = function(e, x, y)
-		{
+		touch.prototype.doStart = function(e, x, y) {
 
 			var t = this,
 				offset = t.element.offset();
@@ -242,8 +252,8 @@
 						t.timerTap = window.setTimeout(function() {
 						
 							// In a valid tap? Trigger "tap"
-								if (t.inTap && t.taps > 0)
-								{
+								if (t.inTap && t.taps > 0) {
+									
 									t.element.trigger(
 										(t.taps == 2 ? 'doubleTap' : 'tap'),
 										{
@@ -257,6 +267,7 @@
 									);
 									
 									t.cancel();
+								
 								}
 							
 							// Clear tap timer
@@ -266,8 +277,8 @@
 					
 				// tapAndHold
 					
-					if (t.uses('tapAndHold'))
-					{
+					if (t.uses('tapAndHold')) {
+						
 						// Stop existing timer
 							window.clearTimeout(t.timerTapAndHold);
 
@@ -275,8 +286,8 @@
 							t.timerTapAndHold = window.setTimeout(function() {
 							
 								// Use tapAndHold and in a valid tap? Trigger "tapAndHold"
-									if (t.inTap)
-									{
+									if (t.inTap) {
+										
 										t.element.trigger(
 											'tapAndHold', 
 											{ 
@@ -289,12 +300,14 @@
 										);
 										
 										t.cancel();
+									
 									}
 
 								// Clear tapAndHold timer
 									t.timerTapAndHold = null;
 							
 							}, t.settings.tapAndHoldDelay);
+					
 					}
 				
 			// We're now in a tap
@@ -302,8 +315,7 @@
 
 		};
 		
-		touch.prototype.doMove = function(e, x, y)
-		{
+		touch.prototype.doMove = function(e, x, y) {
 		
 			var	t = this,
 				offset = t.element.offset(),
@@ -313,15 +325,16 @@
 				e.stopPropagation();
 
 			// Prevent default if the element has a swipe or drag event (and the user hasn't manually overriden this behavior with "allowDefault")
-				if (	(t.uses('swipe') && !t.settings.allowDefault.swipe)
-				||	(t.uses('drag') && !t.settings.allowDefault.drag))
+				if ((t.uses('swipe') && !t.settings.allowDefault.swipe)
+				|| (t.uses('drag') && !t.settings.allowDefault.drag))
 					e.preventDefault();
 					
 			// Scrolled? Bail.
-				if (t.scrolled())
-				{
+				if (t.scrolled()) {
+					
 					t.cancel();
 					return;
+				
 				}
 			
 			// In a drag? Trigger "drag"
@@ -337,13 +350,14 @@
 					);
 			
 			// If we've moved past the drag threshold ...
-				else if (diff > t.settings.dragThreshold)
-				{
+				else if (diff > t.settings.dragThreshold) {
+					
 					// Enough time to start?
-						if (Date.now() - t.tapStart < t.settings.dragDelay)
-						{
+						if (Date.now() - t.tapStart < t.settings.dragDelay) {
+							
 							t.cancel();
 							return;
+						
 						}
 
 					// Cancel everything
@@ -369,12 +383,12 @@
 								'ey': y - offset.top
 							}
 						);
+				
 				}
 
 		};
 
-		touch.prototype.doEnd = function(e, x, y)
-		{
+		touch.prototype.doEnd = function(e, x, y) {
 		
 			var	t = this,
 				offset = t.element.offset(),
@@ -388,23 +402,24 @@
 				e.stopPropagation();
 
 			// Scrolled? Bail.
-				if (t.scrolled())
-				{
+				if (t.scrolled()) {
+					
 					t.cancel();
 					return;
+				
 				}
 
 			// If we're in a tap ...
-				if (t.inTap)
-				{
+				if (t.inTap) {
+				
 					// Increase the tap count
 						t.taps++;
 					
 					// Did we hit an end tap condition?
-						if	(!t.timerTap				// Timer ran out?
-						||	(t.taps == 1 && !t.uses('doubleTap'))	// Got one tap (and the element doesn't have a doubleTap event)?
-						||	(t.taps == 2 && t.uses('doubleTap')))	// Got two taps (and the element does have a doubleTap event)?
-						{
+						if	(!t.timerTap // Timer ran out?
+						||	(t.taps == 1 && !t.uses('doubleTap')) // Got one tap (and the element doesn't have a doubleTap event)?
+						||	(t.taps == 2 && t.uses('doubleTap'))) { // Got two taps (and the element does have a doubleTap event)?
+
 							t.element.trigger(
 								(t.taps == 2 ? 'doubleTap' : 'tap'),
 								{ 
@@ -418,12 +433,13 @@
 							);
 							
 							t.cancel();
+						
 						}
+				
 				}
 
 			// If we're in a drag ...
-				else if (t.inDrag)
-				{
+				else if (t.inDrag) {
 
 					// Calculate some stuff
 						duration = Date.now() - t.dragStart;
@@ -454,8 +470,7 @@
 					
 					// Swipe?
 						if (dx > t.settings.swipeThreshold
-						||	dy > t.settings.swipeThreshold)
-						{
+						||	dy > t.settings.swipeThreshold) {
 						
 							// Trigger "swipe"
 								t.element.trigger(
@@ -497,8 +512,8 @@
 								}
 							
 							// Up/Down?
-								else if (dy > dx)
-								{
+								else if (dy > dx) {
+									
 									// Calculate velocity
 										velocity = dy / duration;
 
@@ -523,11 +538,13 @@
 													'velocity': velocity 
 												}
 											);
+
 								}
 
 						}
 					
 					t.inDrag = false;
+				
 				}
 
 		};
