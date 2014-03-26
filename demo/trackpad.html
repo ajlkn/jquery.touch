@@ -7,10 +7,10 @@
 		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 		<script src="../jquery.touch.js"></script>
 		<style>
-			body { font-family: sans-serif; font-size: 12pt; color: #444; line-height: 1.5em; } 
-			h1 { font-size: 1.5em; } 
-			#wrapper { max-width: 600px; margin: 0 auto; text-align: center; } 
-			#pad { width: 100%; height: 300px; margin: 0 auto; background: #ddd; line-height: 300px; border-radius: 25px; font-size: 2em; } 
+			body { font-family: sans-serif; font-size: 12pt; color: #fff; background: #393e45; line-height: 1.5em; } 
+			h1 { font-size: 1.75em; margin: 1em 0; text-align: center; } 
+			#wrapper { position: absolute; top: 50%; left: 50%; margin: -175px 0 0 -300px; height: 300px; width: 600px; text-align: center; } 
+			#pad { width: 100%; height: 300px; margin: 0 auto; background: #444950; line-height: 300px; border-radius: 25px; font-size: 2em; box-shadow: inset 0 3px 0 0 rgba(0,0,0,0.35); } 
 			#name { width: 100%; margin: 1em 0 0.5em 0; font-size: 1.5em; } 
 			#status { font-size: 1em; color: #999; } 		
 		</style>
@@ -23,7 +23,12 @@
 				function _status(s) { $status.text(s); $bh.scrollTop(0); }
 				
 				$pad
-					.enableTouch()
+					.enableTouch({
+						preventDefault: {
+							drag: true,
+							swipe: true
+						}
+					})
 
 					//.on('dragStart',	function(e, o) { _name('dragStart'); _status('Pos: ' + o.ex + ', ' + o.ey); })
 					//.on('drag',		function(e, o) { _name('drag'); _status('Pos: ' + o.ex + ', ' + o.ey); })
@@ -45,8 +50,8 @@
 		</script>
 	</head>
 	<body>
+		<h1>Trackpad</h1>
 		<div id="wrapper">
-			<h1>Trackpad</h1>
 			<div id="pad"></div>
 			<div id="name">...</div>
 			<div id="status">...</div>
