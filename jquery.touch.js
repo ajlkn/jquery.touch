@@ -254,7 +254,7 @@
 							// In a valid tap? Trigger "tap"
 								if (t.inTap && t.taps > 0) {
 									
-									t.element.trigger(
+									t.element.triggerHandler(
 										(t.taps == 2 ? 'doubleTap' : 'tap'),
 										{
 											'taps': t.taps, 
@@ -288,7 +288,7 @@
 								// Use tapAndHold and in a valid tap? Trigger "tapAndHold"
 									if (t.inTap) {
 										
-										t.element.trigger(
+										t.element.triggerHandler(
 											'tapAndHold', 
 											{ 
 												'x': t.x, 
@@ -319,7 +319,8 @@
 		
 			var	t = this,
 				offset = t.element.offset(),
-				diff = (Math.abs(t.x - x) + Math.abs(t.y - y)) / 2;
+				diff = (Math.abs(t.x - x) + Math.abs(t.y - y)) / 2,
+				result;
 
 			// Prevent original event from bubbling
 				e.stopPropagation();
@@ -339,7 +340,7 @@
 			
 			// In a drag? Trigger "drag"
 				if (t.inDrag)
-					t.element.trigger(
+					t.element.triggerHandler(
 						'drag', 
 						{ 
 							'x': x, 
@@ -374,7 +375,7 @@
 							e.preventDefault();
 					
 					// Trigger "dragStart"
-						t.element.trigger(
+						t.element.triggerHandler(
 							'dragStart', 
 							{ 
 								'x': x, 
@@ -396,7 +397,8 @@
 				dy = Math.abs(t.y - y),
 				distance,
 				velocity,
-				duration;
+				duration,
+				result;
 
 			// Prevent original event from bubbling
 				e.stopPropagation();
@@ -420,7 +422,7 @@
 						||	(t.taps == 1 && !t.uses('doubleTap')) // Got one tap (and the element doesn't have a doubleTap event)?
 						||	(t.taps == 2 && t.uses('doubleTap'))) { // Got two taps (and the element does have a doubleTap event)?
 
-							t.element.trigger(
+							result = t.element.triggerHandler(
 								(t.taps == 2 ? 'doubleTap' : 'tap'),
 								{ 
 									'taps': t.taps, 
@@ -431,6 +433,11 @@
 									'duration': Date.now() - t.tapStart 
 								}
 							);
+						
+							if (result === false) {
+								e.stopPropagation();
+								e.preventDefault();
+							}
 							
 							t.cancel();
 						
@@ -447,7 +454,7 @@
 						velocity = distance / duration;
 
 					// Trigger "dragEnd"
-						t.element.trigger(
+						t.element.triggerHandler(
 							'dragEnd', 
 							{
 								'start': {
@@ -473,7 +480,7 @@
 						||	dy > t.settings.swipeThreshold) {
 						
 							// Trigger "swipe"
-								t.element.trigger(
+								t.element.triggerHandler(
 									'swipe', 
 									{ 
 										'distance': distance, 
@@ -490,7 +497,7 @@
 								
 									// Left? Trigger "swipeLeft"
 										if (x < t.x)
-											t.element.trigger(
+											t.element.triggerHandler(
 												'swipeLeft', 
 												{ 
 													'distance': dx, 
@@ -501,7 +508,7 @@
 									
 									// Right? Trigger "swipeRight"
 										else
-											t.element.trigger(
+											t.element.triggerHandler(
 												'swipeRight', 
 												{ 
 													'distance': dx, 
@@ -519,7 +526,7 @@
 
 									// Up? Trigger "swipeUp"
 										if (y < t.y)
-											t.element.trigger(
+											t.element.triggerHandler(
 												'swipeUp', 
 												{ 
 													'distance': dy, 
@@ -530,7 +537,7 @@
 							
 									// Down? Trigger "swipeDown"
 										else
-											t.element.trigger(
+											t.element.triggerHandler(
 												'swipeDown', 
 												{ 
 													'distance': dy, 
