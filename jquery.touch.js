@@ -1,4 +1,4 @@
-/* jquery.touch.js v0.2.4-dev | (c) n33 | n33.co | MIT licensed */
+/* jquery.touch.js v0.2.4 | (c) n33 | n33.co | MIT licensed */
 
 (function($) {
 
@@ -32,6 +32,7 @@
 				tapAndHoldDelay: 750,
 			
 			// Globally prevent default behavior for specific classes of gesture events.
+			// NOTE: Previously this was "allowDefault", and jquery.touch's behavior was reversed (block all, selectively allow).
 				preventDefault: {
 					drag: false,
 					swipe: false,
