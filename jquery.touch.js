@@ -1,4 +1,4 @@
-/* jquery.touch.js v0.2.4 | (c) n33 | n33.co | MIT licensed */
+/* jquery.touch.js v0.2.5 | (c) n33 | n33.co | MIT licensed */
 
 (function($) {
 
@@ -8,6 +8,11 @@
 	// Defaults
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
+		/**
+		 * Default settings.
+		 *
+		 * @type {object}
+		 */
 		var defaultSettings = {
 			
 			// If true, mouse clicks and movements will also trigger touch events.
@@ -45,16 +50,22 @@
 	// touch Class
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * Touch class. Keeps track of all touch event states.
+		 *
+		 * @param {jQuery} element Target element.
+		 * @param {objecT} userSettings User settings (overrides stuff in defaultSettings).
+		 */
 		function touch(element, userSettings) {
 
 			var t = this;
 
-			// Settings
+			// Settings.
 				t.settings = {};
 				t.settings = $.extend(t.settings, defaultSettings);
 				t.settings = $.extend(t.settings, userSettings);
 
-			// Properties
+			// Properties.
 				t.element = element;
 				t.inTap = false;
 				t.inDrag = false;
@@ -79,6 +90,9 @@
 
 		}
 
+		/**
+		 * Initialize the touch object.
+		 */
 		touch.prototype.init = function() {
 
 			var t = this;
@@ -87,75 +101,75 @@
 			// Needed for some elements, otherwise "click" triggers in addition to "tap".
 				if (t.settings.noClick)
 					t.element
-						.on('click', function(e) {
-							e.preventDefault();
+						.on('click', function(event) {
+							event.preventDefault();
 						});
 
-			// Bind touch events
+			// Bind touch events.
 				t.element
-					.on('touchstart', function(e) {
+					.on('touchstart', function(event) {
 
 						t.doStart(
-							e,
-							e.originalEvent.touches[0].pageX,
-							e.originalEvent.touches[0].pageY
+							event,
+							event.originalEvent.touches[0].pageX,
+							event.originalEvent.touches[0].pageY
 						);
 					
 					})
-					.on('touchmove', function(e) {
+					.on('touchmove', function(event) {
 						
 						t.doMove(
-							e,
-							e.originalEvent.changedTouches[0].pageX,
-							e.originalEvent.changedTouches[0].pageY
+							event,
+							event.originalEvent.changedTouches[0].pageX,
+							event.originalEvent.changedTouches[0].pageY
 						);
 
 					})
-					.on('touchend', function(e) {
+					.on('touchend', function(event) {
 					
 						t.doEnd(
-							e,
-							e.originalEvent.changedTouches[0].pageX,
-							e.originalEvent.changedTouches[0].pageY
+							event,
+							event.originalEvent.changedTouches[0].pageX,
+							event.originalEvent.changedTouches[0].pageY
 						);
 					
 					});
 
-			// If useMouse is enabled, bind mouse events as well
+			// If useMouse is enabled, bind mouse events as well.
 				if (t.settings.useMouse) {
 					
 					t.mouseDown = false;
 
 					t.element
-						.on('mousedown', function(e) {
+						.on('mousedown', function(event) {
 							
 							t.mouseDown = true;
 							
 							t.doStart(
-								e,
-								e.pageX,
-								e.pageY
+								event,
+								event.pageX,
+								event.pageY
 							);
 						
 						})
-						.on('mousemove', function(e) {
+						.on('mousemove', function(event) {
 
 							if (t.mouseDown)
 							{
 								t.doMove(
-									e,
-									e.pageX,
-									e.pageY
+									event,
+									event.pageX,
+									event.pageY
 								);
 							}
 
 						})
-						.on('mouseup', function(e) {
+						.on('mouseup', function(event) {
 
 							t.doEnd(
-								e,
-								e.pageX,
-								e.pageY
+								event,
+								event.pageX,
+								event.pageY
 							);
 
 							t.mouseDown = false;
@@ -165,6 +179,12 @@
 
 		};
 		
+		/**
+		 * Determines if the target element uses a particular class of gesture.
+		 *
+		 * @param {string} x Gesture class.
+		 * @return {bool} If true, target element has at least one bound event for the specified gesture class. If false, it doesn't.
+		 */
 		touch.prototype.uses = function(x) {
 
 			var events = $._data(this.element[0], 'events');
@@ -193,10 +213,20 @@
 
 		};
 		
+		/**
+		 * Determines if the user scrolled since a gesture was initiated.
+		 *
+		 * @return {bool} If true, user scrolled. If false, user did not scroll.
+		 */
 		touch.prototype.scrolled = function() {
 			return (this.tapScrollTop != d.scrollTop());
 		};
 		
+		/**
+		 * Cancels all touch events.
+		 *
+		 * @param {bool} mouseDown If true, also cancel events relying on mouseDown.
+		 */
 		touch.prototype.cancel = function(mouseDown) {
 
 			var t = this;
@@ -212,47 +242,54 @@
 
 		};
 
-		touch.prototype.doStart = function(e, x, y) {
+		/**
+		 * Touch start handler.
+		 *
+		 * @param {object} event Original event.
+		 * @param {integer} x X position.
+		 * @param {integer} y Y position.
+		 */
+		touch.prototype.doStart = function(event, x, y) {
 
 			var t = this,
 				offset = t.element.offset();
 
-			// Prevent original event from bubbling
-				e.stopPropagation();
+			// Prevent original event from bubbling.
+				event.stopPropagation();
 
-			// Prevent default if the element has a swipe or drag event (and the user has "preventDefault" turned on)
+			// Prevent default if the element has a swipe or drag event (and the user has "preventDefault" turned on).
 				if ((t.uses('drag') && t.settings.preventDefault.drag)
 				||	(t.uses('swipe') && t.settings.preventDefault.swipe)
 				||	(t.uses('tap') && t.settings.preventDefault.tap))
-					e.preventDefault();
+					event.preventDefault();
 
-			// Hack: Clear touch callout/user select stuff on Webkit if the element has a tapAndHold event
+			// Hack: Clear touch callout/user select stuff on Webkit if the element has a tapAndHold event.
 				if (t.uses('tapAndHold'))
 					t.element
 						.css('-webkit-touch-callout', 'none')
 						.css('-webkit-user-select', 'none');
 					
-			// Set x, y, ex, ey
+			// Set x, y, ex, ey.
 				t.x = x;
 				t.y = y;
 				t.ex = x - offset.left;
 				t.ey = y - offset.top;
 
-			// Set timestamp
+			// Set timestamp.
 				t.tapStart = Date.now();
 				t.tapScrollTop = d.scrollTop();
 		
-			// Set timers
+			// Set timers.
 				
-				// tap
+				// tap.
 					
-					// Stop existing timer
+					// Stop existing timer.
 						window.clearTimeout(t.timerTap);
 				
-					// Set new timer
+					// Set new timer.
 						t.timerTap = window.setTimeout(function() {
 						
-							// In a valid tap? Trigger "tap"
+							// In a valid tap? Trigger "tap".
 								if (t.inTap && t.taps > 0) {
 									
 									t.element.trigger(
@@ -264,7 +301,7 @@
 											'ex': t.ex, 
 											'ey': t.ey, 
 											'duration': Date.now() - t.tapStart,
-											'event': e
+											'event': event
 										}
 									);
 									
@@ -272,22 +309,22 @@
 								
 								}
 								
-							// Clear tap timer
+							// Clear tap timer.
 								t.timerTap = null;
 						
 						}, t.settings.tapDelay);
 					
-				// tapAndHold
+				// tapAndHold.
 					
 					if (t.uses('tapAndHold')) {
 						
-						// Stop existing timer
+						// Stop existing timer.
 							window.clearTimeout(t.timerTapAndHold);
 
-						// Set new timer
+						// Set new timer.
 							t.timerTapAndHold = window.setTimeout(function() {
 							
-								// Use tapAndHold and in a valid tap? Trigger "tapAndHold"
+								// Use tapAndHold and in a valid tap? Trigger "tapAndHold".
 									if (t.inTap) {
 										
 										t.element.trigger(
@@ -298,7 +335,7 @@
 												'ex': t.ex, 
 												'ey': t.ey, 
 												'duration': Date.now() - t.tapStart,
-												'event': e
+												'event': event
 											}
 										);
 										
@@ -306,31 +343,38 @@
 									
 									}
 
-								// Clear tapAndHold timer
+								// Clear tapAndHold timer.
 									t.timerTapAndHold = null;
 							
 							}, t.settings.tapAndHoldDelay);
 					
 					}
 				
-			// We're now in a tap
+			// We're now in a tap.
 				t.inTap = true;
 
 		};
 		
-		touch.prototype.doMove = function(e, x, y) {
+		/**
+		 * Touch move handler.
+		 *
+		 * @param {object} event Original event.
+		 * @param {integer} x X position.
+		 * @param {integer} y Y position.
+		 */
+		touch.prototype.doMove = function(event, x, y) {
 		
 			var	t = this,
 				offset = t.element.offset(),
 				diff = (Math.abs(t.x - x) + Math.abs(t.y - y)) / 2;
 
-			// Prevent original event from bubbling
-				e.stopPropagation();
+			// Prevent original event from bubbling.
+				event.stopPropagation();
 
-			// Prevent default if the element has a swipe or drag event (and the user has "preventDefault" turned on)
+			// Prevent default if the element has a swipe or drag event (and the user has "preventDefault" turned on).
 				if ((t.uses('swipe') && t.settings.preventDefault.swipe)
 				|| (t.uses('drag') && t.settings.preventDefault.drag))
-					e.preventDefault();
+					event.preventDefault();
 					
 			// Scrolled? Bail.
 				if (t.scrolled()) {
@@ -340,7 +384,7 @@
 				
 				}
 			
-			// In a drag? Trigger "drag"
+			// In a drag? Trigger "drag".
 				if (t.inDrag)
 					t.element.trigger(
 						'drag', 
@@ -349,7 +393,7 @@
 							'y': y,
 							'ex': x - offset.left,
 							'ey': y - offset.top,
-							'event': e
+							'event': event
 						}
 					);
 			
@@ -364,20 +408,20 @@
 						
 						}
 
-					// Cancel everything
+					// Cancel everything.
 						t.cancel();
 
-					// We're now in a drag
+					// We're now in a drag.
 						t.inDrag = true;
 
 					// Set timestamp
 						t.dragStart = Date.now();
 					
-					// Prevent default if the element has a drag event
+					// Prevent default if the element has a drag event.
 						if (t.uses('drag'))
-							e.preventDefault();
+							event.preventDefault();
 					
-					// Trigger "dragStart"
+					// Trigger "dragStart".
 						t.element.trigger(
 							'dragStart', 
 							{ 
@@ -385,7 +429,7 @@
 								'y': y,
 								'ex': x - offset.left,
 								'ey': y - offset.top,
-								'event': e
+								'event': event
 							}
 						);
 				
@@ -393,7 +437,14 @@
 
 		};
 
-		touch.prototype.doEnd = function(e, x, y) {
+		/**
+		 * Touch end handler.
+		 *
+		 * @param {object} event Original event.
+		 * @param {integer} x X position.
+		 * @param {integer} y Y position.
+		 */
+		touch.prototype.doEnd = function(event, x, y) {
 		
 			var	t = this,
 				offset = t.element.offset(),
@@ -403,8 +454,8 @@
 				velocity,
 				duration;
 
-			// Prevent original event from bubbling
-				e.stopPropagation();
+			// Prevent original event from bubbling.
+				event.stopPropagation();
 
 			// Scrolled? Bail.
 				if (t.scrolled()) {
@@ -417,7 +468,7 @@
 			// If we're in a tap ...
 				if (t.inTap) {
 				
-					// Increase the tap count
+					// Increase the tap count.
 						t.taps++;
 					
 					// Did we hit an end tap condition?
@@ -434,7 +485,7 @@
 									'ex': t.ex, 
 									'ey': t.ey, 
 									'duration': Date.now() - t.tapStart,
-									'event': e
+									'event': event
 								}
 							);
 							
@@ -447,12 +498,12 @@
 			// If we're in a drag ...
 				else if (t.inDrag) {
 
-					// Calculate some stuff
+					// Calculate some stuff.
 						duration = Date.now() - t.dragStart;
 						distance = Math.sqrt(Math.pow(Math.abs(t.x - x), 2) + Math.pow(Math.abs(t.y - y), 2));
 						velocity = distance / duration;
 
-					// Trigger "dragEnd"
+					// Trigger "dragEnd".
 						t.element.trigger(
 							'dragEnd', 
 							{
@@ -471,7 +522,7 @@
 								'distance': distance,
 								'duration': duration, 
 								'velocity': velocity,
-								'event': e
+								'event': event
 							}
 						);
 					
@@ -479,24 +530,24 @@
 						if (dx > t.settings.swipeThreshold
 						||	dy > t.settings.swipeThreshold) {
 						
-							// Trigger "swipe"
+							// Trigger "swipe".
 								t.element.trigger(
 									'swipe', 
 									{ 
 										'distance': distance, 
 										'duration': duration, 
 										'velocity': velocity,
-										'event': e
+										'event': event
 									}
 								);
 						
 							// Left/Right?
 								if (dx > dy)
 								{
-									// Calculate velocity
+									// Calculate velocity.
 										velocity = dx / duration;
 								
-									// Left? Trigger "swipeLeft"
+									// Left? Trigger "swipeLeft".
 										if (x < t.x)
 											t.element.trigger(
 												'swipeLeft', 
@@ -504,11 +555,11 @@
 													'distance': dx, 
 													'duration': duration, 
 													'velocity': velocity,
-													'event': e
+													'event': event
 												}
 											);
 									
-									// Right? Trigger "swipeRight"
+									// Right? Trigger "swipeRight".
 										else
 											t.element.trigger(
 												'swipeRight', 
@@ -516,18 +567,18 @@
 													'distance': dx, 
 													'duration': duration, 
 													'velocity': velocity,
-													'event': e
+													'event': event
 												}
 											);
 								}
 							
-							// Up/Down?
+							// Up/Down?.
 								else if (dy > dx) {
 									
-									// Calculate velocity
+									// Calculate velocity.
 										velocity = dy / duration;
 
-									// Up? Trigger "swipeUp"
+									// Up? Trigger "swipeUp".
 										if (y < t.y)
 											t.element.trigger(
 												'swipeUp', 
@@ -535,11 +586,11 @@
 													'distance': dy, 
 													'duration': duration, 
 													'velocity': velocity,
-													'event': e
+													'event': event
 												}
 											);
 							
-									// Down? Trigger "swipeDown"
+									// Down? Trigger "swipeDown".
 										else
 											t.element.trigger(
 												'swipeDown', 
@@ -547,7 +598,7 @@
 													'distance': dy, 
 													'duration': duration, 
 													'velocity': velocity,
-													'event': e
+													'event': event
 												}
 											);
 
@@ -565,11 +616,16 @@
 	// jQuery function
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * Enables touch events on a selector.
+		 *
+		 * @param {object} userSettings User settings.
+		 */
 		$.fn.enableTouch = function(userSettings) {
 
 			var	element, o;
 
-			// Handle multiple elements
+			// Handle multiple elements.
 				if (this.length > 1) {
 					
 					for (var i=0; i < this.length; i++)
@@ -579,13 +635,13 @@
 					
 				}
 
-			// Create jQuery object
+			// Create jQuery object.
 				element = $(this);
 
 			// Create touch object
 				o = new touch(element, userSettings);
 				
-			// Expose touch object via the original DOM element
+			// Expose touch object via the original DOM element.
 				element.get(0)._touch = o;
 
 			return element;
