@@ -1,4 +1,4 @@
-/* jquery.touch.js v0.2.5 | (c) n33 | n33.co | MIT licensed */
+/* jquery.touch.js v0.2.6 | (c) n33 | n33.co | MIT licensed */
 
 (function($) {
 
@@ -624,6 +624,10 @@
 		$.fn.enableTouch = function(userSettings) {
 
 			var	element, o;
+
+			// Handle no elements, because apparently that's a thing.
+				if (this.length == 0)
+					return $(this);
 
 			// Handle multiple elements.
 				if (this.length > 1) {
