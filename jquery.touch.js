@@ -2,7 +2,8 @@
 
 (function($) {
 
-	var d = $(document);
+	var d = $(document),
+		dragTarget = null;
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Defaults
@@ -18,8 +19,8 @@
 			// If true, mouse clicks and movements will also trigger touch events.
 				useMouse: true,
 
-			// If true, touch events are automatically cancelled when the mouse cursor leaves the element (requires useMouse: true).
-				cancelOnMouseLeave: false,
+			// If true, touch events are automatically cancelled when the cursor leaves the element.
+				cancelOnLeave: false,
 
 			// Disables "click" event (prevents both "tap" and "click" firing on certain elements like <label>).
 				noClick: false,
@@ -121,19 +122,31 @@
 					})
 					.on('touchmove', function(event) {
 
+						var pos = fixPos(
+							t,
+							event.originalEvent.touches[0].pageX,
+							event.originalEvent.touches[0].pageY
+						);
+
 						t.doMove(
 							event,
-							event.originalEvent.changedTouches[0].pageX,
-							event.originalEvent.changedTouches[0].pageY
+							pos.x,
+							pos.y
 						);
 
 					})
 					.on('touchend', function(event) {
 
-						t.doEnd(
-							event,
+						var pos = fixPos(
+							t,
 							event.originalEvent.changedTouches[0].pageX,
 							event.originalEvent.changedTouches[0].pageY
+						);
+
+						t.doEnd(
+							event,
+							pos.x,
+							pos.y
 						);
 
 					});
@@ -169,6 +182,9 @@
 						})
 						.on('mouseup', function(event) {
 
+							// Trigger document's mouseup handler (in case this event was fired on this element while dragging another).
+								d.triggerHandler('mouseup');
+
 							t.doEnd(
 								event,
 								event.pageX,
@@ -179,21 +195,23 @@
 
 						});
 
-					if (t.settings.cancelOnMouseLeave)
-						t.element
-							.on('mouseleave', function(event) {
-
-								t.doEnd(
-									event,
-									event.pageX,
-									event.pageY
-								);
-
-								t.mouseDown = false;
-
-							})
-
 				}
+
+			// Cancel on leave?
+				if (t.settings.cancelOnLeave)
+					t.element
+						.on('mouseleave', function(event) {
+
+							t.doEnd(
+								event,
+								event.pageX,
+								event.pageY
+							);
+
+							t.mouseDown = false;
+
+						})
+
 
 		};
 
@@ -403,7 +421,8 @@
 				}
 
 			// In a drag? Trigger "drag".
-				if (t.inDrag)
+				if (t.inDrag
+				&&	dragTarget == t)
 					t.element.trigger(
 						'drag',
 						{
@@ -450,6 +469,9 @@
 								'event': event
 							}
 						);
+
+					// Set drag target.
+						dragTarget = t;
 
 				}
 
@@ -543,6 +565,9 @@
 								'event': event
 							}
 						);
+
+					// Clear drag target.
+						dragTarget = null;
 
 					// Swipe?
 						if (dx > t.settings.swipeThreshold
@@ -669,5 +694,90 @@
 			return element;
 
 		};
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Init.
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 * Adjusts a pair of coordinates to ensure they're within the boundaries of a given touch object's element.
+		 *
+		 * @oparam t {object} Touch object.
+		 * @param x {integer} X value.
+		 * @param y {integer} y value.
+		 * @return {object} New coordinates.
+		 */
+		function fixPos(t, x, y) {
+
+			var offset, width, height, nx, ny;
+
+			// Get element's offset and dimenions.
+				offset = t.element.offset(),
+				width = t.element.width(),
+				height = t.element.height();
+
+			// Normalize x and y.
+				nx = Math.min(Math.max(x, offset.left), offset.left + width);
+				ny = Math.min(Math.max(y, offset.top), offset.top + height);
+
+			// Return new coordinates.
+				return {
+					x: nx,
+					y: ny
+				};
+
+		};
+
+		// Documnet-level events (mouse only).
+		// These are used to trigger drag events on an element even if the mouse cursor is beyond its boundaries.
+			d
+				.on('mousemove', function(event) {
+
+					t = dragTarget;
+
+					if (t
+					&&	t.settings.useMouse
+					&&	t.mouseDown) {
+
+						var pos = fixPos(
+							t,
+							event.pageX,
+							event.pageY
+						);
+
+						t.doMove(
+							event,
+							pos.x,
+							pos.y
+						);
+
+					}
+
+				})
+				.on('mouseup', function(event) {
+
+					t = dragTarget;
+
+					if (t
+					&&	t.settings.useMouse
+					&&	!t.settings.cancelOnLeave) {
+
+						var pos = fixPos(
+							t,
+							event.pageX,
+							event.pageY
+						);
+
+						t.doEnd(
+							event,
+							pos.pageX,
+							pos.pageY
+						);
+
+						t.mouseDown = false;
+
+					}
+
+				});
 
 })(jQuery);
