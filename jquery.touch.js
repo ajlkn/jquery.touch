@@ -18,6 +18,9 @@
 			// If true, mouse clicks and movements will also trigger touch events.
 				useMouse: true,
 
+			// If true, touch events are automatically cancelled when the mouse cursor leaves the element (requires useMouse: true).
+				cancelOnMouseLeave: false,
+
 			// Disables "click" event (prevents both "tap" and "click" firing on certain elements like <label>).
 				noClick: false,
 
@@ -175,6 +178,21 @@
 							t.mouseDown = false;
 
 						});
+
+					if (t.settings.cancelOnMouseLeave)
+						t.element
+							.on('mouseleave', function(event) {
+
+								t.doEnd(
+									event,
+									event.pageX,
+									event.pageY
+								);
+
+								t.mouseDown = false;
+
+							})
+
 				}
 
 		};
