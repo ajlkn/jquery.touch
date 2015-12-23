@@ -20,7 +20,7 @@
 				useMouse: true,
 
 			// If true, touch events are automatically cancelled when the cursor leaves the element.
-				cancelOnLeave: false,
+				cancelOnLeave: true,
 
 			// Disables "click" event (prevents both "tap" and "click" firing on certain elements like <label>).
 				noClick: false,
@@ -737,7 +737,8 @@
 
 					if (t
 					&&	t.settings.useMouse
-					&&	t.mouseDown) {
+					&&	t.mouseDown
+					&&	!t.settings.cancelOnLeave) {
 
 						var pos = fixPos(
 							t,
