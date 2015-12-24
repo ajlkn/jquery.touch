@@ -19,8 +19,11 @@
 			// If true, mouse clicks and movements will also trigger touch events.
 				useMouse: true,
 
-			// If true, touch events are automatically cancelled when the cursor leaves the element.
-				cancelOnLeave: true,
+			// If true, certain events (like drag) can continue to track even if the mouse cursor leaves the originating element.
+				trackDocument: false,
+
+			// If true, when "trackDocument" is enabled, coordinates will be normalized to the confines of the originating element.
+				trackDocumentNormalize: false,
 
 			// Disables "click" event (prevents both "tap" and "click" firing on certain elements like <label>).
 				noClick: false,
@@ -197,8 +200,8 @@
 
 				}
 
-			// Cancel on leave?
-				if (t.settings.cancelOnLeave)
+			// No document tracking? Watch for "mouseleave".
+				if (!t.settings.trackDocument)
 					t.element
 						.on('mouseleave', function(event) {
 
@@ -733,49 +736,80 @@
 			d
 				.on('mousemove', function(event) {
 
-					t = dragTarget;
+					var t = dragTarget;
 
 					if (t
 					&&	t.settings.useMouse
 					&&	t.mouseDown
-					&&	!t.settings.cancelOnLeave) {
+					&&	t.settings.trackDocument) {
 
-						var pos = fixPos(
-							t,
-							event.pageX,
-							event.pageY
-						);
+						// Get coordinates.
+							var	x = event.pageX,
+								y = event.pageY;
 
-						t.doMove(
-							event,
-							pos.x,
-							pos.y
-						);
+						// Normalize coordinates?
+							if (t.settings.trackDocumentNormalize) {
+
+								var pos = fixPos(
+									t,
+									x,
+									y
+								);
+
+								x = pos.x;
+								y = pos.y;
+
+							}
+
+						// Trigger "move".
+							t.doMove(
+								event,
+								x,
+								y
+							);
 
 					}
 
 				})
 				.on('mouseup', function(event) {
 
-					t = dragTarget;
+					var t = dragTarget;
 
 					if (t
 					&&	t.settings.useMouse
-					&&	!t.settings.cancelOnLeave) {
+					&&	t.settings.trackDocument) {
 
-						var pos = fixPos(
-							t,
-							event.pageX,
-							event.pageY
-						);
+						// No pageX in event? "mouseup" likely already handled by originating element, so bail.
+							if (!('pageX' in event))
+								return;
 
-						t.doEnd(
-							event,
-							pos.pageX,
-							pos.pageY
-						);
+						// Get coordinates.
+							var	x = event.pageX,
+								y = event.pageY;
 
-						t.mouseDown = false;
+						// Normalize coordinates?
+							if (t.settings.trackDocumentNormalize) {
+
+								var pos = fixPos(
+									t,
+									x,
+									y
+								);
+
+								x = pos.x;
+								y = pos.y;
+
+							}
+
+						// Trigger "end".
+							t.doEnd(
+								event,
+								x,
+								y
+							);
+
+						// Clear mouseDown state.
+							t.mouseDown = false;
 
 					}
 
