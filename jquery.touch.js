@@ -186,7 +186,7 @@
 						.on('mouseup', function(event) {
 
 							// Trigger document's mouseup handler (in case this event was fired on this element while dragging another).
-								d.triggerHandler('mouseup');
+								d.triggerHandler('mouseup', event);
 
 							t.doEnd(
 								event,
@@ -258,7 +258,7 @@
 		 * @return {bool} If true, user scrolled. If false, user did not scroll.
 		 */
 		touch.prototype.scrolled = function() {
-			return (this.tapScrollTop != d.scrollTop());
+			return (this.tapScrollTop !== null && (this.tapScrollTop != d.scrollTop()));
 		};
 
 		/**
@@ -771,13 +771,17 @@
 					}
 
 				})
-				.on('mouseup', function(event) {
+				.on('mouseup', function(event, previousEvent) {
 
 					var t = dragTarget;
 
 					if (t
 					&&	t.settings.useMouse
 					&&	t.settings.trackDocument) {
+
+						// Previous event provided? Use that instead.
+							if (typeof previousEvent !== 'undefined')
+								event = previousEvent;
 
 						// No pageX in event? "mouseup" likely already handled by originating element, so bail.
 							if (!('pageX' in event))
