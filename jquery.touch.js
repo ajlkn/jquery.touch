@@ -416,12 +416,14 @@
 					event.preventDefault();
 
 			// Scrolled? Bail.
+			/*
 				if (t.scrolled()) {
 
 					t.cancel();
 					return;
 
 				}
+			*/
 
 			// In a drag? Trigger "drag".
 				if (t.inDrag
@@ -501,12 +503,14 @@
 				event.stopPropagation();
 
 			// Scrolled? Bail.
+			/*
 				if (t.scrolled()) {
 
 					t.cancel();
 					return;
 
 				}
+			*/
 
 			// If we're in a tap ...
 				if (t.inTap) {
