@@ -89,8 +89,8 @@
 				t.taps = 0;
 
 			// Hack: Turn off useMouse if the device supports touch events. Temporary solution, as this may break things in environments with mixed input types (mouse + touch).
-				if (!!('ontouchstart' in window))
-					t.settings.useMouse = false;
+			//	if (!!('ontouchstart' in window))
+			//		t.settings.useMouse = false;
 
 			// Init
 				t.init();
@@ -102,7 +102,9 @@
 		 */
 		touch.prototype.init = function() {
 
-			var t = this;
+			var t = this,
+				_started = false,
+				_ended = false;
 
 			// Disable click event?
 			// Needed for some elements, otherwise "click" triggers in addition to "tap".
@@ -116,41 +118,62 @@
 				t.element
 					.on('touchstart', function(event) {
 
-						t.doStart(
-							event,
-							event.originalEvent.touches[0].pageX,
-							event.originalEvent.touches[0].pageY
-						);
+						// Mark as started.
+							_started = true;
+
+						// Start.
+							t.doStart(
+								event,
+								event.originalEvent.touches[0].pageX,
+								event.originalEvent.touches[0].pageY
+							);
+
+						// Clear started after delay.
+							window.setTimeout(function() {
+								_started = false;
+							}, 1000);
 
 					})
 					.on('touchmove', function(event) {
 
-						var pos = fixPos(
-							t,
-							event.originalEvent.touches[0].pageX,
-							event.originalEvent.touches[0].pageY
-						);
+						// Get position.
+							var pos = fixPos(
+								t,
+								event.originalEvent.touches[0].pageX,
+								event.originalEvent.touches[0].pageY
+							);
 
-						t.doMove(
-							event,
-							pos.x,
-							pos.y
-						);
+						// Move.
+							t.doMove(
+								event,
+								pos.x,
+								pos.y
+							);
 
 					})
 					.on('touchend', function(event) {
 
-						var pos = fixPos(
-							t,
-							event.originalEvent.changedTouches[0].pageX,
-							event.originalEvent.changedTouches[0].pageY
-						);
+						// Mark as ended.
+							_ended = true;
 
-						t.doEnd(
-							event,
-							pos.x,
-							pos.y
-						);
+						// Get position.
+							var pos = fixPos(
+								t,
+								event.originalEvent.changedTouches[0].pageX,
+								event.originalEvent.changedTouches[0].pageY
+							);
+
+						// End.
+							t.doEnd(
+								event,
+								pos.x,
+								pos.y
+							);
+
+						// Clear ended after delay.
+							window.setTimeout(function() {
+								_ended = false;
+							}, 1000);
 
 					});
 
@@ -162,39 +185,52 @@
 					t.element
 						.on('mousedown', function(event) {
 
-							t.mouseDown = true;
+							// If we've already been started (which would *only* happen if touchstart were just triggered),
+							// bail immediately so we don't attempt to double start.
+								if (_started)
+									return false;
 
-							t.doStart(
-								event,
-								event.pageX,
-								event.pageY
-							);
+							// Mark mouse down.
+								t.mouseDown = true;
 
-						})
-						.on('mousemove', function(event) {
-
-							if (t.mouseDown)
-							{
-								t.doMove(
+							// Start.
+								t.doStart(
 									event,
 									event.pageX,
 									event.pageY
 								);
-							}
+
+						})
+						.on('mousemove', function(event) {
+
+							// If mouse down, move.
+								if (t.mouseDown)
+									t.doMove(
+										event,
+										event.pageX,
+										event.pageY
+									);
 
 						})
 						.on('mouseup', function(event) {
 
+							// If we've already ended (which would *only* happen if touchend were just triggered),
+							// bail immediately so we don't attempt to double end.
+								if (_ended)
+									return false;
+
 							// Trigger document's mouseup handler (in case this event was fired on this element while dragging another).
 								d.triggerHandler('mouseup', event);
 
-							t.doEnd(
-								event,
-								event.pageX,
-								event.pageY
-							);
+							// End.
+								t.doEnd(
+									event,
+									event.pageX,
+									event.pageY
+								);
 
-							t.mouseDown = false;
+							// Clear mouse down.
+								t.mouseDown = false;
 
 						});
 
