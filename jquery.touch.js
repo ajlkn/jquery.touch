@@ -1,8 +1,8 @@
-/* jquery.touch.js v0.3.0-dev | (c) n33 | n33.co | MIT licensed */
+/* jquery.touch v0.3.0-dev | (c) @ajlkn | github.com/ajlkn/jquery.touch | MIT licensed */
 
 (function($) {
 
-	var d = $(document),
+	var $document = $(document),
 		dragTarget = null;
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,20 +60,19 @@
 		/**
 		 * Touch class. Keeps track of all touch event states.
 		 *
-		 * @param {jQuery} element Target element.
-		 * @param {objecT} userSettings User settings (overrides stuff in defaultSettings).
+		 * @param {jQuery} $element Target element.
+		 * @param {jQuery} $sourceElement Source element.
+		 * @param {object} settings Settings.
 		 */
-		function touch(element, userSettings) {
+		function touch($element, $sourceElement, settings) {
 
 			var t = this;
 
-			// Settings.
-				t.settings = {};
-				t.settings = $.extend(t.settings, defaultSettings);
-				t.settings = $.extend(t.settings, userSettings);
+			t.settings = settings;
 
 			// Properties.
-				t.element = element;
+				t.$element = $element;
+				t.$sourceElement = $sourceElement;
 				t.inTap = false;
 				t.inDrag = false;
 				t.tapStart = null;
@@ -87,172 +86,16 @@
 				t.ex = null;
 				t.ey = null;
 				t.taps = 0;
+				t.started = false;
+				t.ended = false;
 
 			// Hack: Turn off useMouse if the device supports touch events. Temporary solution, as this may break things in environments with mixed input types (mouse + touch).
-			//	if (!!('ontouchstart' in window))
-			//		t.settings.useMouse = false;
-
-			// Init
-				t.init();
+			/*
+				if (!!('ontouchstart' in window))
+					t.settings.useMouse = false;
+			*/
 
 		}
-
-		/**
-		 * Initialize the touch object.
-		 */
-		touch.prototype.init = function() {
-
-			var t = this,
-				_started = false,
-				_ended = false;
-
-			// Disable click event?
-			// Needed for some elements, otherwise "click" triggers in addition to "tap".
-				if (t.settings.noClick)
-					t.element
-						.on('click', function(event) {
-							event.preventDefault();
-						});
-
-			// Bind touch events.
-				t.element
-					.on('touchstart', function(event) {
-
-						// Mark as started.
-							_started = true;
-
-						// Start.
-							t.doStart(
-								event,
-								event.originalEvent.touches[0].pageX,
-								event.originalEvent.touches[0].pageY
-							);
-
-						// Clear started after delay.
-							window.setTimeout(function() {
-								_started = false;
-							}, 1000);
-
-					})
-					.on('touchmove', function(event) {
-
-						// Get position.
-							var pos = fixPos(
-								t,
-								event.originalEvent.touches[0].pageX,
-								event.originalEvent.touches[0].pageY
-							);
-
-						// Move.
-							t.doMove(
-								event,
-								pos.x,
-								pos.y
-							);
-
-					})
-					.on('touchend', function(event) {
-
-						// Mark as ended.
-							_ended = true;
-
-						// Get position.
-							var pos = fixPos(
-								t,
-								event.originalEvent.changedTouches[0].pageX,
-								event.originalEvent.changedTouches[0].pageY
-							);
-
-						// End.
-							t.doEnd(
-								event,
-								pos.x,
-								pos.y
-							);
-
-						// Clear ended after delay.
-							window.setTimeout(function() {
-								_ended = false;
-							}, 1000);
-
-					});
-
-			// If useMouse is enabled, bind mouse events as well.
-				if (t.settings.useMouse) {
-
-					t.mouseDown = false;
-
-					t.element
-						.on('mousedown', function(event) {
-
-							// If we've already been started (which would *only* happen if touchstart were just triggered),
-							// bail immediately so we don't attempt to double start.
-								if (_started)
-									return false;
-
-							// Mark mouse down.
-								t.mouseDown = true;
-
-							// Start.
-								t.doStart(
-									event,
-									event.pageX,
-									event.pageY
-								);
-
-						})
-						.on('mousemove', function(event) {
-
-							// If mouse down, move.
-								if (t.mouseDown)
-									t.doMove(
-										event,
-										event.pageX,
-										event.pageY
-									);
-
-						})
-						.on('mouseup', function(event) {
-
-							// If we've already ended (which would *only* happen if touchend were just triggered),
-							// bail immediately so we don't attempt to double end.
-								if (_ended)
-									return false;
-
-							// Trigger document's mouseup handler (in case this event was fired on this element while dragging another).
-								d.triggerHandler('mouseup', event);
-
-							// End.
-								t.doEnd(
-									event,
-									event.pageX,
-									event.pageY
-								);
-
-							// Clear mouse down.
-								t.mouseDown = false;
-
-						});
-
-				}
-
-			// No document tracking? Watch for "mouseleave".
-				if (!t.settings.trackDocument)
-					t.element
-						.on('mouseleave', function(event) {
-
-							t.doEnd(
-								event,
-								event.pageX,
-								event.pageY
-							);
-
-							t.mouseDown = false;
-
-						})
-
-
-		};
 
 		/**
 		 * Determines if the target element uses a particular class of gesture.
@@ -262,7 +105,7 @@
 		 */
 		touch.prototype.uses = function(x) {
 
-			var events = $._data(this.element[0], 'events');
+			var events = $._data(this.$sourceElement[0], 'events');
 
 			switch (x) {
 
@@ -294,7 +137,7 @@
 		 * @return {bool} If true, user scrolled. If false, user did not scroll.
 		 */
 		touch.prototype.scrolled = function() {
-			return (this.tapScrollTop !== null && (this.tapScrollTop != d.scrollTop()));
+			return (this.tapScrollTop !== null && (this.tapScrollTop != $document.scrollTop()));
 		};
 
 		/**
@@ -327,7 +170,7 @@
 		touch.prototype.doStart = function(event, x, y) {
 
 			var t = this,
-				offset = t.element.offset();
+				offset = t.$element.offset();
 
 			// Prevent original event from bubbling.
 				event.stopPropagation();
@@ -340,7 +183,7 @@
 
 			// Hack: Clear touch callout/user select stuff on Webkit if the element has a tapAndHold event.
 				if (t.uses('tapAndHold'))
-					t.element
+					t.$element
 						.css('-webkit-touch-callout', 'none')
 						.css('-webkit-user-select', 'none');
 
@@ -352,22 +195,22 @@
 
 			// Set timestamp.
 				t.tapStart = Date.now();
-				t.tapScrollTop = d.scrollTop();
+				t.tapScrollTop = $document.scrollTop();
 
 			// Set timers.
 
 				// tap.
 
 					// Stop existing timer.
-						window.clearTimeout(t.timerTap);
+						clearTimeout(t.timerTap);
 
 					// Set new timer.
-						t.timerTap = window.setTimeout(function() {
+						t.timerTap = setTimeout(function() {
 
 							// In a valid tap? Trigger "tap".
 								if (t.inTap && t.taps > 0) {
 
-									t.element.trigger(
+									t.$element.trigger(
 										(t.taps == 2 ? 'doubleTap' : 'tap'),
 										{
 											'taps': t.taps,
@@ -394,15 +237,15 @@
 					if (t.uses('tapAndHold')) {
 
 						// Stop existing timer.
-							window.clearTimeout(t.timerTapAndHold);
+							clearTimeout(t.timerTapAndHold);
 
 						// Set new timer.
-							t.timerTapAndHold = window.setTimeout(function() {
+							t.timerTapAndHold = setTimeout(function() {
 
 								// Use tapAndHold and in a valid tap? Trigger "tapAndHold".
 									if (t.inTap) {
 
-										t.element.trigger(
+										t.$element.trigger(
 											'tapAndHold',
 											{
 												'x': t.x,
@@ -440,7 +283,7 @@
 		touch.prototype.doMove = function(event, x, y) {
 
 			var	t = this,
-				offset = t.element.offset(),
+				offset = t.$element.offset(),
 				diff = (Math.abs(t.x - x) + Math.abs(t.y - y)) / 2;
 
 			// Prevent original event from bubbling.
@@ -464,7 +307,7 @@
 			// In a drag? Trigger "drag".
 				if (t.inDrag
 				&&	dragTarget == t)
-					t.element.trigger(
+					t.$element.trigger(
 						'drag',
 						{
 							'x': x,
@@ -500,7 +343,7 @@
 							event.preventDefault();
 
 					// Trigger "dragStart".
-						t.element.trigger(
+						t.$element.trigger(
 							'dragStart',
 							{
 								'x': x,
@@ -528,7 +371,7 @@
 		touch.prototype.doEnd = function(event, x, y) {
 
 			var	t = this,
-				offset = t.element.offset(),
+				offset = t.$element.offset(),
 				dx = Math.abs(t.x - x),
 				dy = Math.abs(t.y - y),
 				distance,
@@ -559,7 +402,7 @@
 						||	(t.taps == 1 && !t.uses('doubleTap')) // Got one tap (and the element doesn't have a doubleTap event)?
 						||	(t.taps == 2 && t.uses('doubleTap'))) { // Got two taps (and the element does have a doubleTap event)?
 
-							t.element.trigger(
+							t.$element.trigger(
 								(t.taps == 2 ? 'doubleTap' : 'tap'),
 								{
 									'taps': t.taps,
@@ -587,7 +430,7 @@
 						velocity = distance / duration;
 
 					// Trigger "dragEnd".
-						t.element.trigger(
+						t.$element.trigger(
 							'dragEnd',
 							{
 								'start': {
@@ -617,7 +460,7 @@
 						||	dy > t.settings.swipeThreshold) {
 
 							// Trigger "swipe".
-								t.element.trigger(
+								t.$element.trigger(
 									'swipe',
 									{
 										'distance': distance,
@@ -635,7 +478,7 @@
 
 									// Left? Trigger "swipeLeft".
 										if (x < t.x)
-											t.element.trigger(
+											t.$element.trigger(
 												'swipeLeft',
 												{
 													'distance': dx,
@@ -647,7 +490,7 @@
 
 									// Right? Trigger "swipeRight".
 										else
-											t.element.trigger(
+											t.$element.trigger(
 												'swipeRight',
 												{
 													'distance': dx,
@@ -666,7 +509,7 @@
 
 									// Up? Trigger "swipeUp".
 										if (y < t.y)
-											t.element.trigger(
+											t.$element.trigger(
 												'swipeUp',
 												{
 													'distance': dy,
@@ -678,7 +521,7 @@
 
 									// Down? Trigger "swipeDown".
 										else
-											t.element.trigger(
+											t.$element.trigger(
 												'swipeDown',
 												{
 													'distance': dy,
@@ -709,32 +552,229 @@
 		 */
 		$.fn.enableTouch = function(userSettings) {
 
-			var	element, o;
+			var $this = $(this);
 
-			// Handle no elements, because apparently that's a thing.
-				if (this.length == 0)
-					return $(this);
-
-			// Handle multiple elements.
+			// Multiple elements?
 				if (this.length > 1) {
 
 					for (var i=0; i < this.length; i++)
-						$(this[i]).enableTouch();
-
-					return $(this);
+						$.enableTouch($(this[i]), userSettings);
 
 				}
 
-			// Create jQuery object.
-				element = $(this);
+			// Single element?
+				else if (this.length == 1)
+					$.enableTouch($this, userSettings);
 
-			// Create touch object
-				o = new touch(element, userSettings);
+			return $this;
 
-			// Expose touch object via the original DOM element.
-				element.get(0)._touch = o;
+		};
 
-			return element;
+		$.enableTouch = function($this, userSettings) {
+
+			var settings = {};
+
+			// Build settings.
+				settings = $.extend(settings, defaultSettings);
+				settings = $.extend(settings, userSettings);
+
+			// Disable click event?
+			// Needed for some elements, otherwise "click" triggers in addition to "tap".
+				if (settings.noClick)
+					$this
+						.on('click', function(event) {
+							event.preventDefault();
+						});
+
+			// Bind touch events.
+
+				// Start (touchstart).
+					var onTouchStart = function(event) {
+
+						var	$element = $(this),
+							touch = getTouch($element, $this, settings);
+
+						// Mark as started.
+							touch.started = true;
+
+						// Start.
+							touch.doStart(
+								event,
+								event.originalEvent.touches[0].pageX,
+								event.originalEvent.touches[0].pageY
+							);
+
+						// Clear started after delay.
+							setTimeout(function() {
+								touch.started = false;
+							}, 1000);
+
+					};
+
+					$this
+						.on('touchstart', onTouchStart)
+						.on('touchstart', '*', onTouchStart);
+
+				// Move (touchmove).
+					var onTouchMove = function(event) {
+
+						var	$element = $(this),
+							touch = getTouch($element, $this, settings);
+
+						// Get position.
+							var pos = fixPos(
+								touch,
+								event.originalEvent.touches[0].pageX,
+								event.originalEvent.touches[0].pageY
+							);
+
+						// Move.
+							touch.doMove(
+								event,
+								pos.x,
+								pos.y
+							);
+
+					};
+
+					$this
+						.on('touchmove', onTouchMove)
+						.on('touchmove', '*', onTouchMove);
+
+				// End (touchend).
+					var onTouchEnd = function(event) {
+
+						var	$element = $(this),
+							touch = getTouch($element, $this, settings);
+
+						// Mark as ended.
+							touch.ended = true;
+
+						// Get position.
+							var pos = fixPos(
+								touch,
+								event.originalEvent.changedTouches[0].pageX,
+								event.originalEvent.changedTouches[0].pageY
+							);
+
+						// End.
+							touch.doEnd(
+								event,
+								pos.x,
+								pos.y
+							);
+
+						// Clear ended after delay.
+							setTimeout(function() {
+								touch.ended = false;
+							}, 1000);
+
+					};
+
+					$this
+						.on('touchend', onTouchEnd)
+						.on('touchend', '*', onTouchEnd);
+
+			// If useMouse is enabled, bind mouse events as well.
+				if (settings.useMouse) {
+
+					// Start (mousedown).
+						var onMouseDown = function(event) {
+
+							var	$element = $(this),
+								touch = getTouch($element, $this, settings);
+
+							// If we've already been started (which would *only* happen if touchstart were just triggered),
+							// bail immediately so we don't attempt to double start.
+								if (touch.started)
+									return false;
+
+							// Mark mouse down.
+								touch.mouseDown = true;
+
+							// Start.
+								touch.doStart(
+									event,
+									event.pageX,
+									event.pageY
+								);
+
+						};
+
+						$this
+							.on('mousedown', onMouseDown)
+							.on('mousedown', '*', onMouseDown);
+
+					// Move (mousemove).
+						var onMouseMove = function(event) {
+
+							var	$element = $(this),
+								touch = getTouch($element, $this, settings);
+
+							// If mouse down, move.
+								if (touch.mouseDown)
+									touch.doMove(
+										event,
+										event.pageX,
+										event.pageY
+									);
+
+						};
+
+						$this
+							.on('mousemove', onMouseMove)
+							.on('mousemove', '*', onMouseMove);
+
+					// End (mouseup).
+						var onMouseUp = function(event) {
+
+							var	$element = $(this),
+								touch = getTouch($element, $this, settings);
+
+							// If we've already ended (which would *only* happen if touchend were just triggered),
+							// bail immediately so we don't attempt to double end.
+								if (touch.ended)
+									return false;
+
+							// Trigger document's mouseup handler (in case this event was fired on this element while dragging another).
+								$document.triggerHandler('mouseup', event);
+
+							// End.
+								touch.doEnd(
+									event,
+									event.pageX,
+									event.pageY
+								);
+
+							// Clear mouse down.
+								touch.mouseDown = false;
+
+						};
+
+						$this
+							.on('mouseup', onMouseUp)
+							.on('mouseup', '*', onMouseUp);
+
+				}
+
+			// No document tracking? Watch for "mouseleave".
+				if (!settings.trackDocument)
+					$this
+						.on('mouseleave', function(event) {
+
+							var	$element = $(this),
+								touch = getTouch($element, $this, settings);
+
+							touch.doEnd(
+								event,
+								event.pageX,
+								event.pageY
+							);
+
+							touch.mouseDown = false;
+
+						})
+
 
 		};
 
@@ -743,9 +783,28 @@
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		/**
+		 * Gets an element's touch property.
+		 *
+		 * @param {jQuery} $element Target element.
+		 * @param {jQuery} $sourceElement Source element.
+		 * @param {object} userSettings User settings.
+		 */
+		function getTouch($element, $sourceElement, userSettings) {
+
+			var element = $element[0];
+
+			// No touch property? Initialize it.
+				if (typeof element._touch == 'undefined')
+					element._touch = new touch($element, $sourceElement, userSettings);
+
+			return element._touch;
+
+		};
+
+		/**
 		 * Adjusts a pair of coordinates to ensure they're within the boundaries of a given touch object's element.
 		 *
-		 * @oparam t {object} Touch object.
+		 * @param t {object} Touch object.
 		 * @param x {integer} X value.
 		 * @param y {integer} y value.
 		 * @return {object} New coordinates.
@@ -755,9 +814,9 @@
 			var offset, width, height, nx, ny;
 
 			// Get element's offset and dimenions.
-				offset = t.element.offset(),
-				width = t.element.width(),
-				height = t.element.height();
+				offset = t.$element.offset(),
+				width = t.$element.width(),
+				height = t.$element.height();
 
 			// Normalize x and y.
 				nx = Math.min(Math.max(x, offset.left), offset.left + width);
@@ -773,7 +832,7 @@
 
 		// Documnet-level events (mouse only).
 		// These are used to trigger drag events on an element even if the mouse cursor is beyond its boundaries.
-			d
+			$document
 				.on('mousemove', function(event) {
 
 					var t = dragTarget;
