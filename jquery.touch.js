@@ -41,7 +41,7 @@
 				tapDelay: 250,
 
 			// Time to wait before triggering "tapAndHold".
-				tapAndHoldDelay: 750,
+				tapAndHoldDelay: 500,
 
 			// Globally prevent default behavior for specific classes of gesture events.
 			// NOTE: Previously this was "allowDefault", and jquery.touch's behavior was reversed (block all, selectively allow).
