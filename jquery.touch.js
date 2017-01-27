@@ -293,7 +293,7 @@
 			var	t = this,
 				offset = t.$element.offset(),
 				diff = (Math.abs(t.x - x) + Math.abs(t.y - y)) / 2,
-				e;
+				$dropTargetElement, e;
 
 			// Prevent original event from bubbling.
 				event.stopPropagation();
@@ -330,9 +330,9 @@
 						}
 					);
 
-					// Handle drop target.
+					// Handle drop target events.
 
-						// Get element below cursor.
+						// Get element below the cursor.
 
 							// Temporarily turn off this element's pointer events.
 								t.$element.css('pointer-events', 'none');
@@ -353,7 +353,8 @@
 							// Turn this element's pointer events back on.
 								t.$element.css('pointer-events', '');
 
-						// Already have a drop target *and* it's not the element below this one? We've left it.
+						// Handle "leave".
+						// Triggered when we already have a drop target, but the cursor's no longer above it.
 							if (dropTargetElement
 							&&	dropTargetElement !== e) {
 
@@ -371,7 +372,8 @@
 
 							}
 
-						// No drop target? Set it to the element below this one.
+						// Handle "enter".
+						// Triggered when we don't have a drop target.
 							if (!dropTargetElement) {
 
 								// Set drop target.
@@ -383,6 +385,30 @@
 										{
 											'element': t.$element[0],
 											'event': event
+										}
+									);
+
+							}
+
+						// Handle "drag".
+						// Triggered when we have a drop target.
+							if (dropTargetElement) {
+
+								$dropTargetElement = $(dropTargetElement);
+
+								// Get offset.
+									offset = $dropTargetElement.offset();
+
+								// Trigger "dropDrag".
+									$dropTargetElement.trigger(
+										'dropDrag',
+										{
+											'element': t.$element[0],
+											'event': event,
+											'x': x,
+											'y': y,
+											'ex': x - offset.left,
+											'ey': y - offset.top
 										}
 									);
 
@@ -452,7 +478,8 @@
 				dy = Math.abs(t.y - y),
 				distance,
 				velocity,
-				duration;
+				duration,
+				$dropTargetElement;
 
 			// Prevent original event from bubbling.
 				event.stopPropagation();
@@ -614,17 +641,27 @@
 					// Cancel drag.
 						t.inDrag = false;
 
-					// Handle drop target.
+					// Handle drop target events.
 
-						// Drop target exists?
+						// Handle "drop".
+						// Triggered when we have a drop target.
 							if (dropTargetElement) {
 
+								$dropTargetElement = $(dropTargetElement);
+
+								// Get offset.
+									offset = $dropTargetElement.offset();
+
 								// Trigger "drop".
-									$(dropTargetElement).trigger(
+									$dropTargetElement.trigger(
 										'drop',
 										{
 											'element': t.$element[0],
-											'event': event
+											'event': event,
+											'x': x,
+											'y': y,
+											'ex': x - offset.left,
+											'ey': y - offset.top
 										}
 									);
 
