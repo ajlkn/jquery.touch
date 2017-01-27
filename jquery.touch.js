@@ -44,6 +44,9 @@
 			// Time to wait before triggering "tapAndHold".
 				tapAndHoldDelay: 500,
 
+			// If true, enables delegation of touch events.
+				delegateEvents: true,
+
 			// Globally prevent default behavior for specific classes of gesture events.
 			// NOTE: Previously this was "allowDefault", and jquery.touch's behavior was reversed (block all, selectively allow).
 				preventDefault: {
@@ -704,9 +707,10 @@
 
 					};
 
-					$this
-						.on('touchstart', onTouchStart)
-						.on('touchstart', '*', onTouchStart);
+					$this.on('touchstart', onTouchStart);
+
+					if (settings.delegateEvents)
+						$this.on('touchstart', '*', onTouchStart);
 
 				// Move (touchmove).
 					var onTouchMove = function(event) {
@@ -730,9 +734,10 @@
 
 					};
 
-					$this
-						.on('touchmove', onTouchMove)
-						.on('touchmove', '*', onTouchMove);
+					$this.on('touchmove', onTouchMove);
+
+					if (settings.delegateEvents)
+						$this.on('touchmove', '*', onTouchMove);
 
 				// End (touchend).
 					var onTouchEnd = function(event) {
@@ -764,9 +769,10 @@
 
 					};
 
-					$this
-						.on('touchend', onTouchEnd)
-						.on('touchend', '*', onTouchEnd);
+					$this.on('touchend', onTouchEnd);
+
+					if (settings.delegateEvents)
+						$this.on('touchend', '*', onTouchEnd);
 
 			// If useMouse is enabled, bind mouse events as well.
 				if (settings.useMouse) {
@@ -794,9 +800,10 @@
 
 						};
 
-						$this
-							.on('mousedown', onMouseDown)
-							.on('mousedown', '*', onMouseDown);
+						$this.on('mousedown', onMouseDown);
+
+						if (settings.delegateEvents)
+							$this.on('mousedown', '*', onMouseDown);
 
 					// Move (mousemove).
 						var onMouseMove = function(event) {
@@ -814,9 +821,10 @@
 
 						};
 
-						$this
-							.on('mousemove', onMouseMove)
-							.on('mousemove', '*', onMouseMove);
+						$this.on('mousemove', onMouseMove);
+
+						if (settings.delegateEvents)
+							$this.on('mousemove', '*', onMouseMove);
 
 					// End (mouseup).
 						var onMouseUp = function(event) {
@@ -844,9 +852,10 @@
 
 						};
 
-						$this
-							.on('mouseup', onMouseUp)
-							.on('mouseup', '*', onMouseUp);
+						$this.on('mouseup', onMouseUp);
+
+						if (settings.delegateEvents)
+							$this.on('mouseup', '*', onMouseUp);
 
 				}
 
