@@ -3,7 +3,8 @@
 (function($) {
 
 	var $document = $(document),
-		dragTarget = null;
+		dragTarget = null,
+		dropTargetElement = null;
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Defaults
@@ -85,6 +86,8 @@
 				t.y = null;
 				t.ex = null;
 				t.ey = null;
+				t.exStart = null;
+				t.eyStart = null;
 				t.taps = 0;
 				t.started = false;
 				t.ended = false;
@@ -154,6 +157,8 @@
 			t.inDrag = false;
 			t.tapStart = null;
 			t.dragStart = null;
+			t.exStart = null;
+			t.eyStart = null;
 
 			if (mouseDown)
 				t.mouseDown = false;
@@ -284,7 +289,8 @@
 
 			var	t = this,
 				offset = t.$element.offset(),
-				diff = (Math.abs(t.x - x) + Math.abs(t.y - y)) / 2;
+				diff = (Math.abs(t.x - x) + Math.abs(t.y - y)) / 2,
+				e;
 
 			// Prevent original event from bubbling.
 				event.stopPropagation();
@@ -306,7 +312,8 @@
 
 			// In a drag? Trigger "drag".
 				if (t.inDrag
-				&&	dragTarget == t)
+				&&	dragTarget == t) {
+
 					t.$element.trigger(
 						'drag',
 						{
@@ -314,9 +321,71 @@
 							'y': y,
 							'ex': x - offset.left,
 							'ey': y - offset.top,
+							'exStart': t.exStart,
+							'eyStart': t.eyStart,
 							'event': event
 						}
 					);
+
+					// Handle drop target.
+
+						// Get element below cursor.
+
+							// Temporarily turn off this element's pointer events.
+								t.$element.css('pointer-events', 'none');
+
+							// Get element below this one.
+							// Note: Offset by document scroll if this element is position: fixed.
+								if (t.$element.css('position') == 'fixed')
+									e = document.elementFromPoint(
+										x - $document.scrollLeft(),
+										y - $document.scrollTop()
+									);
+								else
+									e = document.elementFromPoint(
+										x,
+										y
+									);
+
+							// Turn this element's pointer events back on.
+								t.$element.css('pointer-events', '');
+
+						// Already have a drop target *and* it's not the element below this one? We've left it.
+							if (dropTargetElement
+							&&	dropTargetElement !== e) {
+
+								// Trigger "dropLeave".
+									$(dropTargetElement).trigger(
+										'dropLeave',
+										{
+											'element': t.$element[0],
+											'event': event
+										}
+									);
+
+								// Clear drop target.
+									dropTargetElement = null;
+
+							}
+
+						// No drop target? Set it to the element below this one.
+							if (!dropTargetElement) {
+
+								// Set drop target.
+									dropTargetElement = e;
+
+								// Trigger "dropEnter".
+									$(dropTargetElement).trigger(
+										'dropEnter',
+										{
+											'element': t.$element[0],
+											'event': event
+										}
+									);
+
+							}
+
+				}
 
 			// If we've moved past the drag threshold ...
 				else if (diff > t.settings.dragThreshold) {
@@ -335,8 +404,12 @@
 					// We're now in a drag.
 						t.inDrag = true;
 
-					// Set timestamp
+					// Set timestamp.
 						t.dragStart = Date.now();
+
+					// Set starting element coordinates.
+						t.exStart = x - offset.left;
+						t.eyStart = y - offset.top;
 
 					// Prevent default if the element has a drag event.
 						if (t.uses('drag'))
@@ -348,8 +421,8 @@
 							{
 								'x': x,
 								'y': y,
-								'ex': x - offset.left,
-								'ey': y - offset.top,
+								'ex': t.exStart,
+								'ey': t.eyStart,
 								'event': event
 							}
 						);
@@ -535,7 +608,27 @@
 
 						}
 
-					t.inDrag = false;
+					// Cancel drag.
+						t.inDrag = false;
+
+					// Handle drop target.
+
+						// Drop target exists?
+							if (dropTargetElement) {
+
+								// Trigger "drop".
+									$(dropTargetElement).trigger(
+										'drop',
+										{
+											'element': t.$element[0],
+											'event': event
+										}
+									);
+
+								// Clear drop target.
+									dropTargetElement = null;
+
+							}
 
 				}
 
