@@ -683,7 +683,7 @@
 		 *
 		 * @param {object} userSettings User settings.
 		 */
-		$.fn.enableTouch = function(userSettings) {
+		$.fn.touch = function(userSettings) {
 
 			var $this = $(this);
 
@@ -691,19 +691,34 @@
 				if (this.length > 1) {
 
 					for (var i=0; i < this.length; i++)
-						$.enableTouch($(this[i]), userSettings);
+						$.touch($(this[i]), userSettings);
 
 				}
 
 			// Single element?
 				else if (this.length == 1)
-					$.enableTouch($this, userSettings);
+					$.touch($this, userSettings);
 
 			return $this;
 
 		};
 
-		$.enableTouch = function($this, userSettings) {
+		/**
+		 * Alias for touch() function.
+		 *
+		 * @param {object} userSettings User settings.
+		 */
+		$.fn.enableTouch = function(userSettings) {
+			return $(this).touch(userSettings);
+		};
+
+		/**
+		 * Enables touch events on a jQuery element.
+		 *
+		 * @param {jQuery} $this Element.
+		 * @param {object} userSettings User settings.
+		 */
+		$.touch = function($this, userSettings) {
 
 			var settings = {};
 
