@@ -293,7 +293,7 @@
 			var	t = this,
 				offset = t.$element.offset(),
 				diff = (Math.abs(t.x - x) + Math.abs(t.y - y)) / 2,
-				$dropTargetElement, e;
+				e;
 
 			// Prevent original event from bubbling.
 				event.stopPropagation();
@@ -358,11 +358,11 @@
 							if (dropTargetElement
 							&&	dropTargetElement !== e) {
 
-								// Trigger "dropLeave".
-									$(dropTargetElement).trigger(
-										'dropLeave',
+								// Trigger "dragLeave".
+									t.$element.trigger(
+										'dragLeave',
 										{
-											'element': t.$element[0],
+											'element': dropTargetElement,
 											'event': event
 										}
 									);
@@ -379,31 +379,29 @@
 								// Set drop target.
 									dropTargetElement = e;
 
-								// Trigger "dropEnter".
-									$(dropTargetElement).trigger(
-										'dropEnter',
+								// Trigger "dragEnter".
+									t.$element.trigger(
+										'dragEnter',
 										{
-											'element': t.$element[0],
+											'element': dropTargetElement,
 											'event': event
 										}
 									);
 
 							}
 
-						// Handle "drag".
+						// Handle "over".
 						// Triggered when we have a drop target.
 							if (dropTargetElement) {
 
-								$dropTargetElement = $(dropTargetElement);
-
 								// Get offset.
-									offset = $dropTargetElement.offset();
+									offset = $(dropTargetElement).offset();
 
-								// Trigger "dropDrag".
-									$dropTargetElement.trigger(
-										'dropDrag',
+								// Trigger "dragOver".
+									t.$element.trigger(
+										'dragOver',
 										{
-											'element': t.$element[0],
+											'element': dropTargetElement,
 											'event': event,
 											'x': x,
 											'y': y,
@@ -478,8 +476,7 @@
 				dy = Math.abs(t.y - y),
 				distance,
 				velocity,
-				duration,
-				$dropTargetElement;
+				duration;
 
 			// Prevent original event from bubbling.
 				event.stopPropagation();
@@ -526,6 +523,33 @@
 
 			// If we're in a drag ...
 				else if (t.inDrag) {
+
+					// Handle drop target events.
+
+						// Handle "drop".
+						// Triggered when we have a drop target.
+							if (dropTargetElement) {
+
+								// Get offset.
+									offset = $(dropTargetElement).offset();
+
+								// Trigger "drop".
+									t.$element.trigger(
+										'drop',
+										{
+											'element': dropTargetElement,
+											'event': event,
+											'x': x,
+											'y': y,
+											'ex': x - offset.left,
+											'ey': y - offset.top
+										}
+									);
+
+								// Clear drop target.
+									dropTargetElement = null;
+
+							}
 
 					// Calculate some stuff.
 						duration = Date.now() - t.dragStart;
@@ -640,35 +664,6 @@
 
 					// Cancel drag.
 						t.inDrag = false;
-
-					// Handle drop target events.
-
-						// Handle "drop".
-						// Triggered when we have a drop target.
-							if (dropTargetElement) {
-
-								$dropTargetElement = $(dropTargetElement);
-
-								// Get offset.
-									offset = $dropTargetElement.offset();
-
-								// Trigger "drop".
-									$dropTargetElement.trigger(
-										'drop',
-										{
-											'element': t.$element[0],
-											'event': event,
-											'x': x,
-											'y': y,
-											'ex': x - offset.left,
-											'ey': y - offset.top
-										}
-									);
-
-								// Clear drop target.
-									dropTargetElement = null;
-
-							}
 
 				}
 
