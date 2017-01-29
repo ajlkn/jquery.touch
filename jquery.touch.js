@@ -81,6 +81,7 @@
 				t.$element = $element;
 				t.$sourceElement = $sourceElement;
 				t.inTap = false;
+				t.inTapAndHold = false;
 				t.inDrag = false;
 				t.tapStart = null;
 				t.dragStart = null;
@@ -160,6 +161,7 @@
 
 			t.taps = 0;
 			t.inTap = false;
+			t.inTapAndHold = false;
 			t.inDrag = false;
 			t.tapStart = null;
 			t.dragStart = null;
@@ -274,6 +276,9 @@
 
 								// Clear tapAndHold timer.
 									t.timerTapAndHold = null;
+
+								// We're now in a tap and hold.
+									t.inTapAndHold = true;
 
 							}, t.settings.tapAndHoldDelay);
 
@@ -679,6 +684,24 @@
 
 					// Cancel drag.
 						t.inDrag = false;
+
+				}
+
+			// If we're in a tap and hold ...
+				else if (t.inTapAndHold) {
+
+					// Trigger "tapAndHoldEnd".
+						t.$element.trigger(
+							'tapAndHoldEnd',
+							{
+								'x': t.x,
+								'y': t.y,
+								'event': event
+							}
+						);
+
+					// Cancel tap and hold.
+						t.inTapAndHold = false;
 
 				}
 
