@@ -87,7 +87,6 @@
 				t.dragStart = null;
 				t.timerTap = null;
 				t.timerTapAndHold = null;
-				t.tapScrollTop = null;
 				t.mouseDown = false;
 				t.x = null;
 				t.y = null;
@@ -139,15 +138,6 @@
 
 			return false;
 
-		};
-
-		/**
-		 * Determines if the user scrolled since a gesture was initiated.
-		 *
-		 * @return {bool} If true, user scrolled. If false, user did not scroll.
-		 */
-		touch.prototype.scrolled = function() {
-			return (this.tapScrollTop !== null && (this.tapScrollTop != $document.scrollTop()));
 		};
 
 		/**
@@ -208,7 +198,6 @@
 
 			// Set timestamp.
 				t.tapStart = Date.now();
-				t.tapScrollTop = $document.scrollTop();
 
 			// Set timers.
 
@@ -310,16 +299,6 @@
 				if ((t.uses('swipe') && t.settings.preventDefault.swipe)
 				|| (t.uses('drag') && t.settings.preventDefault.drag))
 					event.preventDefault();
-
-			// Scrolled? Bail.
-			/*
-				if (t.scrolled()) {
-
-					t.cancel();
-					return;
-
-				}
-			*/
 
 			// In a drag? Trigger "drag".
 				if (t.inDrag
@@ -500,16 +479,6 @@
 
 			// Prevent original event from bubbling.
 				event.stopPropagation();
-
-			// Scrolled? Bail.
-			/*
-				if (t.scrolled()) {
-
-					t.cancel();
-					return;
-
-				}
-			*/
 
 			// If we're in a tap ...
 				if (t.inTap) {
