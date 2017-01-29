@@ -47,6 +47,9 @@
 			// If true, enables delegation of touch events.
 				delegateEvents: true,
 
+			// If true, limits drop targets to siblings of dragged element.
+				limitDrop: false,
+
 			// Globally prevent default behavior for specific classes of gesture events.
 			// NOTE: Previously this was "allowDefault", and jquery.touch's behavior was reversed (block all, selectively allow).
 				preventDefault: {
@@ -352,6 +355,17 @@
 
 							// Turn this element's pointer events back on.
 								t.$element.css('pointer-events', '');
+
+							// Drop limiting enabled? Apply it.
+								if (t.settings.limitDrop)
+									while (e.parentElement != t.$element[0].parentElement) {
+
+										e = e.parentElement;
+
+										if (!e)
+											break;
+
+									}
 
 						// Handle "leave".
 						// Triggered when we already have a drop target, but the cursor's no longer above it.
