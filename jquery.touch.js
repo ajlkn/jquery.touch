@@ -375,8 +375,12 @@
 
 														e = e.parentElement;
 
-														if (!e)
+														if (!e) {
+
+															e = null;
 															break;
+
+														}
 
 													}
 												}
@@ -386,6 +390,10 @@
 									}
 
 								}
+
+							// Make sure drop target isn't the element being dragged (because that would be weird).
+								if (e === t.$element[0])
+									e = null;
 
 						// Handle "leave".
 						// Triggered when we already have a drop target, but the cursor's no longer above it.
