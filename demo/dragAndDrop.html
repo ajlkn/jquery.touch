@@ -31,35 +31,25 @@
 					line-height: 1;
 				}
 
-				.orderable > .item.is-dragging {
-					margin: 0;
-					box-shadow: 0 0.025em 0.25em 0 rgba(0,0,0,0.125);
-					background-color: rgba(255,255,255,0.875);
-					cursor: move;
-				}
+					.orderable > .item.is-dragging {
+						margin: 0;
+						box-shadow: 0 0.025em 0.25em 0 rgba(0,0,0,0.125);
+						background-color: rgba(255,255,255,0.875);
+						cursor: move;
+					}
 
-				.orderable > .item.is-dropTarget {
-					background-color: rgba(0,224,192,0.075);
-				}
+					.orderable > .item.is-dropped {
+						background-color: rgba(0,224,192,0.325);
+						transform: scale(1.05);
+					}
 
-				.orderable > .item.is-dropped {
-					background-color: rgba(0,224,192,0.325);
-					transform: scale(1.05);
-				}
+					.orderable > .item.is-dropTarget {
+						background-color: rgba(0,224,192,0.075);
+					}
 
 			.orderable.horizontal {
 				flex-direction: row;
 			}
-
-				.orderable.horizontal > .placeholder {
-					width: 100%;
-					flex-grow: 0 !important;
-					flex-shrink: 0 !important;
-				}
-
-				.orderable.horizontal > .item {
-					width: 100%;
-				}
 
 				.orderable.horizontal > * {
 					margin: 0 0 0 1rem;
@@ -72,28 +62,33 @@
 					margin-left: 0;
 				}
 
-				.orderable.horizontal > .item.is-dropTarget.a {
-					box-shadow: inset 3px 0 0 0 #00E0C0;
-					border-left-color: #00E0C0;
-					border-top-left-radius: 0;
-					border-bottom-left-radius: 0;
+				.orderable.horizontal > .placeholder {
+					width: 100%;
+					flex-grow: 0 !important;
+					flex-shrink: 0 !important;
 				}
 
-				.orderable.horizontal > .item.is-dropTarget.b {
-					box-shadow: inset -3px 0 0 0 #00E0C0;
-					border-right-color: #00E0C0;
-					border-top-right-radius: 0;
-					border-bottom-right-radius: 0;
+				.orderable.horizontal > .item {
+					width: 100%;
 				}
+
+					.orderable.horizontal > .item.is-dropTarget.a {
+						box-shadow: inset 3px 0 0 0 #00E0C0;
+						border-left-color: #00E0C0;
+						border-top-left-radius: 0;
+						border-bottom-left-radius: 0;
+					}
+
+					.orderable.horizontal > .item.is-dropTarget.b {
+						box-shadow: inset -3px 0 0 0 #00E0C0;
+						border-right-color: #00E0C0;
+						border-top-right-radius: 0;
+						border-bottom-right-radius: 0;
+					}
 
 			.orderable.vertical {
 				flex-direction: column;
 			}
-
-				.orderable.vertical > .item {
-					width: 30rem;
-					max-width: 100%;
-				}
 
 				.orderable.vertical > * {
 					margin: 1rem 0 0 0;
@@ -103,19 +98,24 @@
 					margin-top: 0;
 				}
 
-				.orderable.vertical > .item.is-dropTarget.a {
-					box-shadow: inset 0 3px 0 0 #00E0C0;
-					border-top-color: #00E0C0;
-					border-top-left-radius: 0;
-					border-top-right-radius: 0;
+				.orderable.vertical > .item {
+					width: 30rem;
+					max-width: 100%;
 				}
 
-				.orderable.vertical > .item.is-dropTarget.b {
-					box-shadow: inset 0 -3px 0 0 #00E0C0;
-					border-bottom-color: #00E0C0;
-					border-bottom-left-radius: 0;
-					border-bottom-right-radius: 0;
-				}
+					.orderable.vertical > .item.is-dropTarget.a {
+						box-shadow: inset 0 3px 0 0 #00E0C0;
+						border-top-color: #00E0C0;
+						border-top-left-radius: 0;
+						border-top-right-radius: 0;
+					}
+
+					.orderable.vertical > .item.is-dropTarget.b {
+						box-shadow: inset 0 -3px 0 0 #00E0C0;
+						border-bottom-color: #00E0C0;
+						border-bottom-left-radius: 0;
+						border-bottom-right-radius: 0;
+					}
 
 		</style>
 		<script>
@@ -129,7 +129,7 @@
 					hasDropTarget = false;
 
 				$wrapper
-					.enableTouch({
+					.touch({
 
 						// Turn on document tracking for smoother dragging.
 							trackDocument: true,

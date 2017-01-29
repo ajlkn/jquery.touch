@@ -13,7 +13,7 @@
 /* Basic */
 
 	html {
-		font-size: 14pt;
+		font-size: 16pt;
 	}
 
 	@media screen and (max-width: 1680px) {
@@ -29,12 +29,24 @@
 	}
 
 	body {
-		align-items: center;
+		display: -moz-flex;
+		-moz-align-items: center;
+		-moz-flex-direction: column;
+		-moz-justify-content: center;
+		display: -ms-flex;
+		-ms-align-items: center;
+		-ms-flex-direction: column;
+		-ms-justify-content: center;
+		display: -webkit-flex;
+		-webkit-align-items: center;
+		-webkit-flex-direction: column;
+		-webkit-justify-content: center;
 		display: flex;
+		align-items: center;
 		flex-direction: column;
+		justify-content: center;
 		font-family: sans-serif;
 		font-size: 1rem;
-		justify-content: center;
 		line-height: 1.5;
 		margin: 0;
 		min-height: 100vh;
