@@ -44,8 +44,8 @@
 			// Time to wait before triggering "tapAndHold".
 				tapAndHoldDelay: 500,
 
-			// If true, enables delegation of touch events.
-				delegateEvents: true,
+			// If defined, delegates touch events to descendants matching this selector.
+				delegateSelector: null,
 
 			// If true, filters drop target elements based on the type of value specified.
 			// - "selector"                           Target element must match this selector.
@@ -805,10 +805,12 @@
 
 					};
 
-					$this.on('touchstart', onTouchStart);
+					// Bind event.
+						$this.on('touchstart', onTouchStart);
 
-					if (settings.delegateEvents)
-						$this.on('touchstart', '*', onTouchStart);
+					// Delegate?
+						if (settings.delegateSelector)
+							$this.on('touchstart', settings.delegateSelector, onTouchStart);
 
 				// Move (touchmove).
 					var onTouchMove = function(event) {
@@ -832,10 +834,12 @@
 
 					};
 
-					$this.on('touchmove', onTouchMove);
+					// Bind event.
+						$this.on('touchmove', onTouchMove);
 
-					if (settings.delegateEvents)
-						$this.on('touchmove', '*', onTouchMove);
+					// Delegate?
+						if (settings.delegateSelector)
+							$this.on('touchmove', settings.delegateSelector, onTouchMove);
 
 				// End (touchend).
 					var onTouchEnd = function(event) {
@@ -867,10 +871,12 @@
 
 					};
 
-					$this.on('touchend', onTouchEnd);
+					// Bind event.
+						$this.on('touchend', onTouchEnd);
 
-					if (settings.delegateEvents)
-						$this.on('touchend', '*', onTouchEnd);
+					// Delegate?
+						if (settings.delegateSelector)
+							$this.on('touchend', settings.delegateSelector, onTouchEnd);
 
 			// If useMouse is enabled, bind mouse events as well.
 				if (settings.useMouse) {
@@ -898,10 +904,12 @@
 
 						};
 
-						$this.on('mousedown', onMouseDown);
+						// Bind event.
+							$this.on('mousedown', onMouseDown);
 
-						if (settings.delegateEvents)
-							$this.on('mousedown', '*', onMouseDown);
+						// Delegate?
+							if (settings.delegateSelector)
+								$this.on('mousedown', settings.delegateSelector, onMouseDown);
 
 					// Move (mousemove).
 						var onMouseMove = function(event) {
@@ -919,10 +927,12 @@
 
 						};
 
-						$this.on('mousemove', onMouseMove);
+						// Bind event.
+							$this.on('mousemove', onMouseMove);
 
-						if (settings.delegateEvents)
-							$this.on('mousemove', '*', onMouseMove);
+						// Delegate?
+							if (settings.delegateSelector)
+								$this.on('mousemove', settings.delegateSelector, onMouseMove);
 
 					// End (mouseup).
 						var onMouseUp = function(event) {
@@ -950,10 +960,12 @@
 
 						};
 
-						$this.on('mouseup', onMouseUp);
+						// Bind event.
+							$this.on('mouseup', onMouseUp);
 
-						if (settings.delegateEvents)
-							$this.on('mouseup', '*', onMouseUp);
+						// Delegate?
+							if (settings.delegateSelector)
+								$this.on('mouseup', settings.delegateSelector, onMouseUp);
 
 				}
 
