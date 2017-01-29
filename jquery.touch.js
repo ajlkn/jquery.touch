@@ -373,8 +373,9 @@
 							}
 
 						// Handle "enter".
-						// Triggered when we don't have a drop target.
-							if (!dropTargetElement) {
+						// Triggered when we don't have a drop target yet but we're above one.
+							if (!dropTargetElement
+							&&	e) {
 
 								// Set drop target.
 									dropTargetElement = e;
