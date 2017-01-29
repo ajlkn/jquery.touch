@@ -822,18 +822,11 @@
 						var	$element = $(this),
 							touch = getTouch($element, $this, settings);
 
-						// Get position.
-							var pos = fixPos(
-								touch,
-								event.originalEvent.touches[0].pageX,
-								event.originalEvent.touches[0].pageY
-							);
-
 						// Move.
 							touch.doMove(
 								event,
-								pos.x,
-								pos.y
+								event.originalEvent.touches[0].pageX,
+								event.originalEvent.touches[0].pageY
 							);
 
 					};
