@@ -344,56 +344,60 @@
 							// Turn this element's pointer events back on.
 								t.$element.css('pointer-events', '');
 
-							// Drop filter set? Apply it.
-								if (t.settings.dropFilter !== false) {
+							// Found a drop target?
+								if (e) {
 
-									s = typeof t.settings.dropFilter;
+									// Drop filter set? Apply it.
+										if (t.settings.dropFilter !== false) {
 
-									switch (s) {
+											s = typeof t.settings.dropFilter;
 
-										// Selector.
-											case 'string':
-												if (!$(e).is(t.settings.dropFilter))
-													e = null;
+											switch (s) {
 
-												break;
-
-										// Callback.
-											case 'function':
-
-												if ((t.settings.dropFilter)(t.$element[0], e) === false)
-													e = null;
-
-												break;
-
-										// Siblings only.
-											default:
-											case 'boolean':
-
-												if (t.settings.dropFilter === true) {
-													while (e.parentElement != t.$element[0].parentElement) {
-
-														e = e.parentElement;
-
-														if (!e) {
-
+												// Selector.
+													case 'string':
+														if (!$(e).is(t.settings.dropFilter))
 															e = null;
-															break;
 
+														break;
+
+												// Callback.
+													case 'function':
+
+														if ((t.settings.dropFilter)(t.$element[0], e) === false)
+															e = null;
+
+														break;
+
+												// Siblings only.
+													default:
+													case 'boolean':
+
+														if (t.settings.dropFilter === true) {
+															while (e.parentElement != t.$element[0].parentElement) {
+
+																e = e.parentElement;
+
+																if (!e) {
+
+																	e = null;
+																	break;
+
+																}
+
+															}
 														}
 
-													}
-												}
+														break;
 
-												break;
+											}
 
-									}
+										}
 
+									// Make sure drop target isn't the element being dragged (because that would be weird).
+										if (e === t.$element[0])
+											e = null;
 								}
-
-							// Make sure drop target isn't the element being dragged (because that would be weird).
-								if (e === t.$element[0])
-									e = null;
 
 						// Handle "leave".
 						// Triggered when we already have a drop target, but the cursor's no longer above it.
