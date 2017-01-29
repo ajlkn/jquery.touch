@@ -16,15 +16,15 @@
 		font-size: 16pt;
 	}
 
-	@media screen and (max-width: 1680px) {
+	@media screen and (max-width: 1440px) {
 		html {
-			font-size: 12pt;
+			font-size: 13pt;
 		}
 	}
 
 	@media screen and (max-width: 736px) {
 		html {
-			font-size: 11pt;
+			font-size: 10pt;
 		}
 	}
 
