@@ -47,8 +47,12 @@
 			// If true, enables delegation of touch events.
 				delegateEvents: true,
 
-			// If true, limits drop targets to siblings of dragged element.
-				limitDrop: false,
+			// If true, filters drop target elements based on the type of value specified.
+			// - "selector"                           Target element must match this selector.
+			// - function(element, target) { ... }    Use boolean return value of a custom callback.
+			// - true                                 Target element must be a sibling of dragged element.
+			// - false                                No filtering.
+				dropFilter: false,
 
 			// Globally prevent default behavior for specific classes of gesture events.
 			// NOTE: Previously this was "allowDefault", and jquery.touch's behavior was reversed (block all, selectively allow).
@@ -290,7 +294,7 @@
 			var	t = this,
 				offset = t.$element.offset(),
 				diff = (Math.abs(t.x - x) + Math.abs(t.y - y)) / 2,
-				e;
+				e, s;
 
 			// Prevent original event from bubbling.
 				event.stopPropagation();
@@ -340,16 +344,48 @@
 							// Turn this element's pointer events back on.
 								t.$element.css('pointer-events', '');
 
-							// Drop limiting enabled? Apply it.
-								if (t.settings.limitDrop)
-									while (e.parentElement != t.$element[0].parentElement) {
+							// Drop filter set? Apply it.
+								if (t.settings.dropFilter !== false) {
 
-										e = e.parentElement;
+									s = typeof t.settings.dropFilter;
 
-										if (!e)
-											break;
+									switch (s) {
+
+										// Selector.
+											case 'string':
+												if (!$(e).is(t.settings.dropFilter))
+													e = null;
+
+												break;
+
+										// Callback.
+											case 'function':
+
+												if ((t.settings.dropFilter)(t.$element[0], e) === false)
+													e = null;
+
+												break;
+
+										// Siblings only.
+											default:
+											case 'boolean':
+
+												if (t.settings.dropFilter === true) {
+													while (e.parentElement != t.$element[0].parentElement) {
+
+														e = e.parentElement;
+
+														if (!e)
+															break;
+
+													}
+												}
+
+												break;
 
 									}
+
+								}
 
 						// Handle "leave".
 						// Triggered when we already have a drop target, but the cursor's no longer above it.
