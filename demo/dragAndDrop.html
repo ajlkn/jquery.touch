@@ -10,12 +10,18 @@
 		<script src="../jquery.touch.js"></script>
 		<style>
 
+			#wrapper {
+				-webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+			}
+
 			.orderable {
 				display: -moz-flex;
 				display: -ms-flex;
 				display: -webkit-flex;
 				display: flex;
 				font-size: 2rem;
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
 			}
 
 				.orderable > .placeholder {
@@ -144,248 +150,255 @@
 
 			$(function() {
 
-				var	$document = $(document),
-					$wrapper = $('#wrapper'),
-					$placeholder = $('<div class="placeholder"></div>'),
-					isDragging = false,
-					hasDropTarget = false;
+				// Vars.
+					var	$document = $(document),
+						$wrapper = $('#wrapper'),
+						$placeholder = $('<div class="placeholder"></div>'),
+						isDragging = false,
+						hasDropTarget = false,
+						isMobile = (navigator.userAgent.match(/(like Mac OS X|Android|Windows Phone)/) !== null);
 
-				$wrapper
-					.touch({
+				// Bind events.
+					$wrapper
+						.touch({
 
-						// Turn on document tracking for smoother dragging.
-							trackDocument: true,
+							// Turn on document tracking for smoother dragging.
+								trackDocument: true,
 
-						// Set drag threshold to zero for maximum drag sensitivity.
-							dragThreshold: 0,
+							// Set drag threshold to zero for maximum drag sensitivity.
+								dragThreshold: 0,
 
-						// Set drag delay to zero for fastest drag response.
-							dragDelay: 0,
+							// Set drag delay to zero for fastest drag response.
+								dragDelay: 0,
 
-						// Turn on drop filter (true = limit to siblings of item being dragged).
-							dropFilter: true,
+							// Turn on drop filter (true = limit to siblings of item being dragged).
+								dropFilter: true,
 
-						// Delegate touch events to items.
-							delegateSelector: '.item',
+							// Delegate touch events to items.
+								delegateSelector: '.item',
 
-						// Lower tap and hold delay.
-							tapAndHoldDelay: 250,
+							// Lower tap and hold delay.
+								tapAndHoldDelay: 250,
 
-						// Prevent default events for drag (so the page doesn't scroll when you're dragging an item).
-							preventDefault: {
-								drag: true
-							}
+							// Prevent default events for drag events. Ordinarily this takes a boolean value, but in the case
+							// of this demo we're doing the following to prevent:
+							//
+							// - If we're *not* on a mobile device, always prevent default drag events.
+							// - If we *are* on a mobile device, only prevent default drag events when we're in a "tap and hold" gesture.
+								preventDefault: {
+									drag: (!isMobile ? true : function(t) { return t.inTapAndHold; })
+								}
 
-					})
-					.on('dragStart tapAndHold', '.orderable > .item', function(event, o) {
+						})
+						.on((!isMobile ? 'dragStart tapAndHold' : 'tapAndHold'), '.orderable > .item', function(event, o) {
 
-						// Stop propagation.
-							event.stopPropagation();
+							// Stop propagation.
+								event.stopPropagation();
 
-						// Vars.
-							var $this = $(this),
-								scrollLeft = $document.scrollLeft(),
-								scrollTop = $document.scrollTop();
+							// Vars.
+								var $this = $(this),
+									scrollLeft = $document.scrollLeft(),
+									scrollTop = $document.scrollTop();
 
-						// Already dragging? Bail.
-							if (isDragging)
-								return;
+							// Already dragging? Bail.
+								if (isDragging)
+									return;
 
-						// Set dragging state.
-							isDragging = true;
+							// Set dragging state.
+								isDragging = true;
 
-						// Size placeholder.
-							$placeholder
-								.css('width', $this.outerWidth() + 'px')
-								.css('height', $this.outerHeight() + 'px');
+							// Size placeholder.
+								$placeholder
+									.css('width', $this.outerWidth() + 'px')
+									.css('height', $this.outerHeight() + 'px');
 
-						// Size and position drag element and mark it as dragging.
-							$this
-								.css('width', $this.outerWidth())
-								.css('height', $this.outerHeight())
-								.addClass('is-dragging')
-								.css('position', 'fixed')
-								.css('top', (o.y - o.ey - scrollTop) + 'px')
-								.css('left', (o.x - o.ex - scrollLeft) + 'px');
+							// Size and position drag element and mark it as dragging.
+								$this
+									.css('width', $this.outerWidth())
+									.css('height', $this.outerHeight())
+									.addClass('is-dragging')
+									.css('position', 'fixed')
+									.css('top', (o.y - o.ey - scrollTop) + 'px')
+									.css('left', (o.x - o.ex - scrollLeft) + 'px');
 
-						// Attach placeholder.
-							$placeholder
-								.insertBefore($this);
+							// Attach placeholder.
+								$placeholder
+									.insertBefore($this);
 
-					})
-					.on('drag', '.orderable > .item.is-dragging', function(event, o) {
+						})
+						.on('drag', '.orderable > .item.is-dragging', function(event, o) {
 
-						// Stop propagation.
-							event.stopPropagation();
+							// Stop propagation.
+								event.stopPropagation();
 
-						// Vars.
-							var $this = $(this),
-								scrollTop = $document.scrollTop(),
-								scrollLeft = $document.scrollLeft();
+							// Vars.
+								var $this = $(this),
+									scrollTop = $document.scrollTop(),
+									scrollLeft = $document.scrollLeft();
 
-						// Update position of drag element.
-							$this
-								.css('top', (o.y - o.eyStart - scrollTop) + 'px')
-								.css('left', (o.x - o.exStart - scrollLeft) + 'px');
+							// Update position of drag element.
+								$this
+									.css('top', (o.y - o.eyStart - scrollTop) + 'px')
+									.css('left', (o.x - o.exStart - scrollLeft) + 'px');
 
-					})
-					.on('dragEnd tapAndHoldEnd', '.orderable > .item.is-dragging', function(event, o) {
+						})
+						.on('dragEnd tapAndHoldEnd', '.orderable > .item.is-dragging', function(event, o) {
 
-						// Stop propagation.
-							event.stopPropagation();
+							// Stop propagation.
+								event.stopPropagation();
 
-						// Vars.
-							var $this = $(this);
+							// Vars.
+								var $this = $(this);
 
-						// Clear dragging state.
-							isDragging = false;
+							// Clear dragging state.
+								isDragging = false;
 
-						// Reset placeholder and detach it.
-							$placeholder
-								.css('width', '')
-								.css('height', '')
-								.detach();
+							// Reset placeholder and detach it.
+								$placeholder
+									.css('width', '')
+									.css('height', '')
+									.detach();
 
-						// Reset drag element.
-							$this
-								.removeClass('is-dragging')
-								.css('width', '')
-								.css('height', '')
-								.css('position', '')
-								.css('top', '')
-								.css('left', '');
+							// Reset drag element.
+								$this
+									.removeClass('is-dragging')
+									.css('width', '')
+									.css('height', '')
+									.css('position', '')
+									.css('top', '')
+									.css('left', '');
 
-					})
-					.on('dragEnter', '.orderable > .item.is-dragging', function(event, o) {
+						})
+						.on('dragEnter', '.orderable > .item.is-dragging', function(event, o) {
 
-						// Stop propagation.
-							event.stopPropagation();
+							// Stop propagation.
+								event.stopPropagation();
 
-						// Vars.
-							var $this = $(this);
+							// Vars.
+								var $this = $(this);
 
-						// Already have a drop target? Bail.
-							if (hasDropTarget)
-								return;
+							// Already have a drop target? Bail.
+								if (hasDropTarget)
+									return;
 
-						// Set drop target state.
-							hasDropTarget = true;
+							// Set drop target state.
+								hasDropTarget = true;
 
-						// Mark as drop target.
-							$(o.element)
-								.addClass('is-dropTarget');
+							// Mark as drop target.
+								$(o.element)
+									.addClass('is-dropTarget');
 
-					})
-					.on('dragLeave', '.orderable > .item.is-dragging', function(event, o) {
+						})
+						.on('dragLeave', '.orderable > .item.is-dragging', function(event, o) {
 
-						// Stop propagation.
-							event.stopPropagation();
+							// Stop propagation.
+								event.stopPropagation();
 
-						// Vars.
-							var $this = $(this);
+							// Vars.
+								var $this = $(this);
 
-						// Clear drop target state.
-							hasDropTarget = false;
+							// Clear drop target state.
+								hasDropTarget = false;
 
-						// Unmark as drop target.
-							$(o.element)
-								.removeClass('is-dropTarget');
+							// Unmark as drop target.
+								$(o.element)
+									.removeClass('is-dropTarget');
 
-					})
-					.on('dragOver', '.orderable > .item.is-dragging', function(event, o) {
+						})
+						.on('dragOver', '.orderable > .item.is-dragging', function(event, o) {
 
-						// Stop propagation.
-							event.stopPropagation();
+							// Stop propagation.
+								event.stopPropagation();
 
-						// Vars.
-							var $this = $(this),
-								$element = $(o.element),
-								$parent = $element.parent(),
-								side = 0;
+							// Vars.
+								var $this = $(this),
+									$element = $(o.element),
+									$parent = $element.parent(),
+									side = 0;
 
-						// Determine side.
-							if ($parent.hasClass('vertical')) {
+							// Determine side.
+								if ($parent.hasClass('vertical')) {
 
-								if (o.ey < Math.ceil($element.outerHeight() / 2))
-									side = 'a';
+									if (o.ey < Math.ceil($element.outerHeight() / 2))
+										side = 'a';
+									else
+										side = 'b';
+
+								}
+								else if ($parent.hasClass('horizontal')) {
+
+									if (o.ex < Math.ceil($element.outerWidth() / 2))
+										side = 'a';
+									else
+										side = 'b';
+
+								}
+
+							// Apply side class.
+								if (side == 'a')
+									$element
+										.addClass('a')
+										.removeClass('b');
 								else
-									side = 'b';
+									$element
+										.addClass('b')
+										.removeClass('a');
 
-							}
-							else if ($parent.hasClass('horizontal')) {
+						})
+						.on('drop', '.orderable > .item.is-dragging', function(event, o) {
 
-								if (o.ex < Math.ceil($element.outerWidth() / 2))
-									side = 'a';
-								else
-									side = 'b';
+							// Stop propagation.
+								event.stopPropagation();
 
-							}
+							// Vars.
+								var $this = $(this),
+									$element = $(o.element),
+									$parent = $element.parent(),
+									side = 0;
 
-						// Apply side class.
-							if (side == 'a')
+							// Clear drop target state.
+								hasDropTarget = false;
+
+							// Determine side.
+								if ($parent.hasClass('vertical')) {
+
+									if (o.ey < Math.ceil($element.outerHeight() / 2))
+										side = 'a';
+									else
+										side = 'b';
+
+								}
+								else if ($parent.hasClass('horizontal')) {
+
+									if (o.ex < Math.ceil($element.outerWidth() / 2))
+										side = 'a';
+									else
+										side = 'b';
+
+								}
+
+							// Unmark all drop targets.
 								$element
-									.addClass('a')
-									.removeClass('b');
-							else
-								$element
-									.addClass('b')
-									.removeClass('a');
+									.removeClass('is-dropTarget');
 
-					})
-					.on('drop', '.orderable > .item.is-dragging', function(event, o) {
+								$element.siblings()
+									.removeClass('is-dropTarget');
 
-						// Stop propagation.
-							event.stopPropagation();
-
-						// Vars.
-							var $this = $(this),
-								$element = $(o.element),
-								$parent = $element.parent(),
-								side = 0;
-
-						// Clear drop target state.
-							hasDropTarget = false;
-
-						// Determine side.
-							if ($parent.hasClass('vertical')) {
-
-								if (o.ey < Math.ceil($element.outerHeight() / 2))
-									side = 'a';
+							// Move element.
+								if (side == 'a')
+									$this.insertBefore($element);
 								else
-									side = 'b';
+									$this.insertAfter($element);
 
-							}
-							else if ($parent.hasClass('horizontal')) {
+							// Apply "dropped" animation.
+								$this
+									.addClass('is-dropped');
 
-								if (o.ex < Math.ceil($element.outerWidth() / 2))
-									side = 'a';
-								else
-									side = 'b';
+								setTimeout(function() {
+									$this.removeClass('is-dropped');
+								}, 50);
 
-							}
-
-						// Unmark all drop targets.
-							$element
-								.removeClass('is-dropTarget');
-
-							$element.siblings()
-								.removeClass('is-dropTarget');
-
-						// Move element.
-							if (side == 'a')
-								$this.insertBefore($element);
-							else
-								$this.insertAfter($element);
-
-						// Apply "dropped" animation.
-							$this
-								.addClass('is-dropped');
-
-							setTimeout(function() {
-								$this.removeClass('is-dropped');
-							}, 50);
-
-					});
+						});
 
 			});
 
