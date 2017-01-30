@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Drag - jquery.touch</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, user-scalable=false" />
+		<link rel="stylesheet" href="common.css" />
+		<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+		<!--<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>-->
+		<script src="../jquery.touch.js"></script>
+		<style>
+
+			#items {
+				height: 100%;
+				left: 0;
+				position: fixed;
+				top: 0;
+				width: 100%;
+			}
+
+			.item {
+				-moz-user-select: none;
+				-ms-user-select: none;
+				-webkit-user-select: none;
+				user-select: none;
+				-moz-transform: scale(1);
+				-webkit-transform: scale(1);
+				-ms-transform: scale(1);
+				transform: scale(1);
+				transition: opacity 0.5s ease-in-out, -moz-transform 0.325s ease-in-out;
+				transition: opacity 0.5s ease-in-out, -webkit-transform 0.325s ease-in-out;
+				transition: opacity 0.5s ease-in-out, -ms-transform 0.325s ease-in-out;
+				transition: opacity 0.5s ease-in-out, transform 0.325s ease-in-out;
+				background-color: rgba(255,255,255,0.875);
+				border-radius: 100%;
+				border: solid 1px rgba(0,0,0,0.25);
+				cursor: pointer;
+				height: 4rem;
+				position: fixed;
+				width: 4rem;
+				z-index: 1;
+				opacity: 1;
+			}
+
+				.item.inactive {
+					-moz-transform: scale(0.25);
+					-webkit-transform: scale(0.25);
+					-ms-transform: scale(0.25);
+					transform: scale(0.25);
+					opacity: 0;
+				}
+
+				.item.is-dragging {
+					box-shadow: 0 0.125em 0.75em 0 rgba(0,0,0,0.125);
+					cursor: move;
+				}
+
+				.item.size1 {
+					width: 2rem;
+					height: 2rem;
+				}
+
+				.item.size2 {
+					width: 4rem;
+					height: 4rem;
+				}
+
+				.item.size3 {
+					width: 6rem;
+					height: 6rem;
+				}
+
+				.item.color1 {
+					background-color: rgba(224,244,255,0.75);
+				}
+
+				.item.color2 {
+					background-color: rgba(255,224,224,0.75);
+				}
+
+				.item.color3 {
+					background-color: rgba(224,255,244,0.75);
+				}
+
+		</style>
+		<script>
+
+			$(function() {
+
+				// Vars.
+					var	$document = $(document),
+						$window = $(window),
+						$items = $('#items'),
+						sw = screen.width - 50,
+						sh = screen.height - 50,
+						isDragging = false,
+						zIndexTop = 1,
+						$item, i, limit;
+
+				// Bind events.
+					$items
+						.touch({
+
+							// Turn on document tracking for smoother dragging.
+								trackDocument: true,
+
+							// Set drag threshold to zero for maximum drag sensitivity.
+								dragThreshold: 0,
+
+							// Set drag delay to zero for fastest drag response.
+								dragDelay: 0,
+
+							// Delegate touch events to items.
+								delegateSelector: '.item',
+
+							// Lower tap and hold delay.
+								tapAndHoldDelay: 150,
+
+							// Prevent default events for drag events.
+								preventDefault: {
+									drag: true
+								}
+
+						})
+						.on('dragStart tapAndHold', '.item', function(event) {
+
+							// Stop propagation.
+								event.stopPropagation();
+
+							// Vars.
+								var $this = $(this);
+
+							// Already dragging? Bail.
+								if (isDragging)
+									return;
+
+							// Set dragging state.
+								isDragging = true;
+
+							// Mark as dragging.
+								$this.addClass('is-dragging');
+
+							// Set z-index.
+								$this.css('z-index', ++zIndexTop);
+
+						})
+						.on('drag', '.item', function(event, o) {
+
+							// Stop propagation.
+								event.stopPropagation();
+
+							// Vars.
+								var $this = $(this);
+
+							// Update position.
+								$this
+									.css('left', (o.x - o.exStart) + 'px')
+									.css('top', (o.y - o.eyStart) + 'px');
+
+						})
+						.on('dragEnd tapAndHoldEnd', '.item', function(event) {
+
+							// Stop propagation.
+								event.stopPropagation();
+
+							// Vars.
+								var $this = $(this);
+
+							// Clear dragging state.
+								isDragging = false;
+
+							// Unmark as dragging.
+								$this.removeClass('is-dragging');
+
+						});
+
+				// Add items.
+					limit = Math.min(200, Math.max(20, Math.floor((sw * sh) / 25000)));
+
+					for (i = 0; i < limit; i++) {
+
+						$('<div class="item"></div>')
+							.appendTo($items)
+							.addClass('inactive')
+							.addClass('color' + Math.floor(Math.random() * 3 + 1))
+							.addClass('size' + Math.floor(Math.random() * 3 + 1))
+							.css('transition-delay', (Math.random() * 0.25) + 's')
+							.css('left', Math.floor(Math.random() * sw + 1) + 'px')
+							.css('top', Math.floor(Math.random() * sh + 1) + 'px');
+
+					}
+
+					$item = $items.children();
+
+				// Show items.
+					$window.on('load', function() {
+						$item.removeClass('inactive');
+					});
+
+			});
+
+		</script>
+	</head>
+	<body>
+
+		<h1>Drag</h1>
+		<div id="items"></div>
+
+	</body>
+</html>
