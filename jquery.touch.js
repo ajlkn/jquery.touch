@@ -47,15 +47,17 @@
 			// If defined, delegates touch events to descendants matching this selector.
 				delegateSelector: null,
 
-			// If true, filters drop target elements based on the type of value specified.
-			// - "selector"                           Target element must match this selector.
-			// - function(element, target) { ... }    Use boolean return value of a custom callback.
-			// - true                                 Target element must be a sibling of dragged element.
-			// - false                                No filtering.
+			// Filters drop target elements. Can be any of the following:
+			// - "selector"                          Target element must match this selector.
+			// - function(element, target) { ... }   Use boolean return value of a custom callback.
+			// - true                                Target element must be a sibling of dragged element.
+			// - false                               No filtering.
 				dropFilter: false,
 
-			// Globally prevent default behavior for specific classes of gesture events.
-			// NOTE: Previously this was "allowDefault", and jquery.touch's behavior was reversed (block all, selectively allow).
+			// Prevent or allow default actions for certain event classes. Can be any of the following:
+			// - true                                Prevent default actions for this event class.
+			// - false                               Allow default actions for this event class.
+			// - function(state) { ... }             Use boolean return value of a custom callback (state = touch state object)
 				preventDefault: {
 					drag: false,
 					swipe: false,
@@ -183,14 +185,15 @@
 				event.stopPropagation();
 
 			// Prevent default if the element has a swipe or drag event (and the user has "preventDefault" turned on).
-				if ((t.uses('drag') && t.settings.preventDefault.drag)
-				||	(t.uses('swipe') && t.settings.preventDefault.swipe)
-				||	(t.uses('tap') && t.settings.preventDefault.tap))
+				if ((t.uses('drag') && (t.settings.preventDefault.drag)(t))
+				||	(t.uses('swipe') && (t.settings.preventDefault.swipe)(t))
+				||	(t.uses('tap') && (t.settings.preventDefault.tap)(t)))
 					event.preventDefault();
 
 			// Hack: Clear touch callout/user select stuff on Webkit if the element has a tapAndHold event.
 				if (t.uses('tapAndHold'))
 					t.$element
+						.css('-webkit-tap-highlight-color', 'rgba(0,0,0,0)')
 						.css('-webkit-touch-callout', 'none')
 						.css('-webkit-user-select', 'none');
 
@@ -207,10 +210,10 @@
 
 				// tap.
 
-					// Stop existing timer.
+					// Stop tap timer.
 						clearTimeout(t.timerTap);
 
-					// Set new timer.
+					// Set new tap timer.
 						t.timerTap = setTimeout(function() {
 
 							// In a valid tap? Trigger "tap".
@@ -242,10 +245,10 @@
 
 					if (t.uses('tapAndHold')) {
 
-						// Stop existing timer.
+						// Stop tapAndHold timer.
 							clearTimeout(t.timerTapAndHold);
 
-						// Set new timer.
+						// Set new tapAndHold timer.
 							t.timerTapAndHold = setTimeout(function() {
 
 								// Use tapAndHold and in a valid tap? Trigger "tapAndHold".
@@ -300,9 +303,14 @@
 				event.stopPropagation();
 
 			// Prevent default if the element has a swipe or drag event (and the user has "preventDefault" turned on).
-				if ((t.uses('swipe') && t.settings.preventDefault.swipe)
-				|| (t.uses('drag') && t.settings.preventDefault.drag))
+				if ((t.uses('swipe') && (t.settings.preventDefault.swipe)(t))
+				|| (t.uses('drag') && (t.settings.preventDefault.drag)(t)))
 					event.preventDefault();
+
+			// Stop tapAndHold timer.
+			// Note: Only if cursor moves too much. Needed to compensate for hypersensitive touchscreens.
+				if (diff > 2)
+					clearTimeout(t.timerTapAndHold);
 
 			// In a drag? Trigger "drag".
 				if (t.inDrag
@@ -486,7 +494,7 @@
 						t.eyStart = y - offset.top;
 
 					// Prevent default if the element has a drag event.
-						if (t.uses('drag'))
+						if (t.uses('drag') && (t.settings.preventDefault.drag)(t))
 							event.preventDefault();
 
 					// Trigger "dragStart".
@@ -530,6 +538,9 @@
 
 			// If we're in a tap ...
 				if (t.inTap) {
+
+					// Stop tapAndHold timer.
+						clearTimeout(t.timerTapAndHold);
 
 					// Increase the tap count.
 						t.taps++;
@@ -707,6 +718,9 @@
 			// If we're in a tap and hold ...
 				else if (t.inTapAndHold) {
 
+					// Stop tapAndHold timer.
+						clearTimeout(t.timerTapAndHold);
+
 					// Trigger "tapAndHoldEnd".
 						t.$element.trigger(
 							'tapAndHoldEnd',
@@ -775,6 +789,16 @@
 			// Build settings.
 				settings = $.extend(settings, defaultSettings);
 				settings = $.extend(settings, userSettings);
+
+			// Expand non-function preventDefault properties to functions.
+				if (typeof settings.preventDefault.drag != 'function')
+					settings.preventDefault.drag = (settings.preventDefault.drag === true ? function(t) { return true; } : function(t) { return false; });
+
+				if (typeof settings.preventDefault.swipe != 'function')
+					settings.preventDefault.swipe = (settings.preventDefault.swipe === true ? function(t) { return true; } : function(t) { return false; });
+
+				if (typeof settings.preventDefault.tap != 'function')
+					settings.preventDefault.tap = (settings.preventDefault.tap === true ? function(t) { return true; } : function(t) { return false; });
 
 			// Disable click event?
 			// Needed for some elements, otherwise "click" triggers in addition to "tap".
