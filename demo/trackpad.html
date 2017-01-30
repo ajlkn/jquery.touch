@@ -6,6 +6,7 @@
 		<meta name="viewport" content="width=device-width, user-scalable=false" />
 		<link rel="stylesheet" href="common.css" />
 		<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+		<!--<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>-->
 		<script src="../jquery.touch.js"></script>
 		<style>
 
@@ -31,15 +32,15 @@
 
 			$(function() {
 
-				var	$pad = $('#pad'),
-					$status = $('#status'),
-					$name = $('#name'),
-					_name = function(s) { $name.text(s); },
-					_status = function(s) { $status.text(s); };
+				// Vars.
+					var	$pad = $('#pad'),
+						$status = $('#status'),
+						$name = $('#name'),
+						_name = function(s) { $name.text(s); },
+						_status = function(s) { $status.text(s); };
 
-				$pad
-
-					// Activate touch events.
+				// Bind events.
+					$pad
 						.touch({
 
 							// Turn on document tracking so stuff works even if the cursor leaves the trackpad.
@@ -56,24 +57,24 @@
 
 						})
 
-					// Tap events.
-						.on('tap',				function(e, o) { _name('tap'); _status('Pos: ' + Math.round(o.ex) + ', ' + Math.round(o.ey)); })
-						.on('doubleTap',		function(e, o) { _name('doubleTap'); _status('Pos: ' + Math.round(o.ex) + ', ' + Math.round(o.ey)); })
-						.on('tapAndHold',		function(e, o) { _name('tapAndHold'); _status('Pos: ' + Math.round(o.ex) + ', ' + Math.round(o.ey)); })
+						// Tap events.
+							.on('tap',				function(e, o) { _name('tap'); _status('Pos: ' + Math.round(o.ex) + ', ' + Math.round(o.ey)); })
+							.on('doubleTap',		function(e, o) { _name('doubleTap'); _status('Pos: ' + Math.round(o.ex) + ', ' + Math.round(o.ey)); })
+							.on('tapAndHold',		function(e, o) { _name('tapAndHold'); _status('Pos: ' + Math.round(o.ex) + ', ' + Math.round(o.ey)); })
 
-					// Drag events.
-						//.on('dragStart',		function(e, o) { _name('dragStart'); _status('Pos: ' + o.ex + ', ' + o.ey); })
-						//.on('drag',			function(e, o) { _name('drag'); _status('Pos: ' + o.ex + ', ' + o.ey); })
-						//.on('dragEnd',		function(e, o) { _name('dragEnd'); _status('S: ' + o.start.ex + ', ' + o.start.ey + ', E: ' + o.end.ex + ', ' + o.end.ey + ', Dist: ' + Math.round(o.distance) + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); })
+						// Drag events.
+							//.on('dragStart',		function(e, o) { _name('dragStart'); _status('Pos: ' + o.ex + ', ' + o.ey); })
+							//.on('drag',			function(e, o) { _name('drag'); _status('Pos: ' + o.ex + ', ' + o.ey); })
+							//.on('dragEnd',		function(e, o) { _name('dragEnd'); _status('S: ' + o.start.ex + ', ' + o.start.ey + ', E: ' + o.end.ex + ', ' + o.end.ey + ', Dist: ' + Math.round(o.distance) + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); })
 
-					// Swipe event.
-						//.on('swipe',			function(e, o) { _name('swipe'); _status('Dist: ' + o.distance + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); })
+						// Swipe event.
+							//.on('swipe',			function(e, o) { _name('swipe'); _status('Dist: ' + o.distance + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); })
 
-					// Swipe events.
-						.on('swipeUp',			function(e, o) { _name('swipeUp'); _status('Dist: ' + Math.round(o.distance) + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); })
-						.on('swipeDown',		function(e, o) { _name('swipeDown'); _status('Dist: ' + Math.round(o.distance) + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); })
-						.on('swipeLeft',		function(e, o) { _name('swipeLeft'); _status('Dist: ' + Math.round(o.distance) + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); })
-						.on('swipeRight',		function(e, o) { _name('swipeRight'); _status('Dist: ' + Math.round(o.distance) + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); });
+						// Swipe events.
+							.on('swipeUp',			function(e, o) { _name('swipeUp'); _status('Dist: ' + Math.round(o.distance) + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); })
+							.on('swipeDown',		function(e, o) { _name('swipeDown'); _status('Dist: ' + Math.round(o.distance) + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); })
+							.on('swipeLeft',		function(e, o) { _name('swipeLeft'); _status('Dist: ' + Math.round(o.distance) + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); })
+							.on('swipeRight',		function(e, o) { _name('swipeRight'); _status('Dist: ' + Math.round(o.distance) + ', Dur: ' + o.duration + ', V: ' + Math.round(o.velocity)); });
 
 			});
 
