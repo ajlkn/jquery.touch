@@ -846,11 +846,30 @@
 						var	$element = $(this),
 							touch = getTouch($element, $this, settings);
 
+						// Get coordinates.
+							var	x = event.originalEvent.touches[0].pageX,
+								y = event.originalEvent.touches[0].pageY;
+
+						// Normalize coordinates?
+							if (touch.settings.trackDocument
+							&&	touch.settings.trackDocumentNormalize) {
+
+								var pos = fixPos(
+									touch,
+									x,
+									y
+								);
+
+								x = pos.x;
+								y = pos.y;
+
+							}
+
 						// Move.
 							touch.doMove(
 								event,
-								event.originalEvent.touches[0].pageX,
-								event.originalEvent.touches[0].pageY
+								x,
+								y
 							);
 
 					};
