@@ -89,7 +89,10 @@ And that's pretty much it.
 ```js
 e.touch({
 
-  // If true, mouse clicks and movements will also trigger touch events.
+  // If true, touch inputs will trigger touch events.
+    useTouch: true,
+
+  // If true, mouse inputs will trigger touch events.
     useMouse: true,
 
   // If true, certain events (like drag) can continue to track even if the

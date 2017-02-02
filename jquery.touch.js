@@ -17,7 +17,10 @@
 		 */
 		var defaultSettings = {
 
-			// If true, mouse clicks and movements will also trigger touch events.
+			// If true, touch inputs will trigger touch events.
+				useTouch: true,
+
+			// If true, mouse inputs will trigger touch events.
 				useMouse: true,
 
 			// If true, certain events (like drag) can continue to track even if the mouse cursor leaves the originating element.
@@ -803,116 +806,119 @@
 						});
 
 			// Bind touch events.
+				if (settings.useTouch) {
 
-				// Start (touchstart).
-					var onTouchStart = function(event) {
+					// Start (touchstart).
+						var onTouchStart = function(event) {
 
-						var	$element = $(this),
-							touch = getTouch($element, $this, settings);
+							var	$element = $(this),
+								touch = getTouch($element, $this, settings);
 
-						// Mark as started.
-							touch.started = true;
+							// Mark as started.
+								touch.started = true;
 
-						// Start.
-							touch.doStart(
-								event,
-								event.originalEvent.touches[0].pageX,
-								event.originalEvent.touches[0].pageY
-							);
+							// Start.
+								touch.doStart(
+									event,
+									event.originalEvent.touches[0].pageX,
+									event.originalEvent.touches[0].pageY
+								);
 
-						// Clear started after delay.
-							setTimeout(function() {
-								touch.started = false;
-							}, 1000);
+							// Clear started after delay.
+								setTimeout(function() {
+									touch.started = false;
+								}, 1000);
 
-					};
+						};
 
-					// Bind event.
-						$this.on('touchstart', onTouchStart);
+						// Bind event.
+							$this.on('touchstart', onTouchStart);
 
-					// Delegate?
-						if (settings.delegateSelector)
-							$this.on('touchstart', settings.delegateSelector, onTouchStart);
+						// Delegate?
+							if (settings.delegateSelector)
+								$this.on('touchstart', settings.delegateSelector, onTouchStart);
 
-				// Move (touchmove).
-					var onTouchMove = function(event) {
+					// Move (touchmove).
+						var onTouchMove = function(event) {
 
-						var	$element = $(this),
-							touch = getTouch($element, $this, settings);
+							var	$element = $(this),
+								touch = getTouch($element, $this, settings);
 
-						// Get coordinates.
-							var	x = event.originalEvent.touches[0].pageX,
-								y = event.originalEvent.touches[0].pageY;
+							// Get coordinates.
+								var	x = event.originalEvent.touches[0].pageX,
+									y = event.originalEvent.touches[0].pageY;
 
-						// Normalize coordinates?
-							if (touch.settings.trackDocument
-							&&	touch.settings.trackDocumentNormalize) {
+							// Normalize coordinates?
+								if (touch.settings.trackDocument
+								&&	touch.settings.trackDocumentNormalize) {
 
-								var pos = fixPos(
-									touch,
+									var pos = fixPos(
+										touch,
+										x,
+										y
+									);
+
+									x = pos.x;
+									y = pos.y;
+
+								}
+
+							// Move.
+								touch.doMove(
+									event,
 									x,
 									y
 								);
 
-								x = pos.x;
-								y = pos.y;
+						};
 
-							}
+						// Bind event.
+							$this.on('touchmove', onTouchMove);
 
-						// Move.
-							touch.doMove(
-								event,
-								x,
-								y
-							);
+						// Delegate?
+							if (settings.delegateSelector)
+								$this.on('touchmove', settings.delegateSelector, onTouchMove);
 
-					};
+					// End (touchend).
+						var onTouchEnd = function(event) {
 
-					// Bind event.
-						$this.on('touchmove', onTouchMove);
+							var	$element = $(this),
+								touch = getTouch($element, $this, settings);
 
-					// Delegate?
-						if (settings.delegateSelector)
-							$this.on('touchmove', settings.delegateSelector, onTouchMove);
+							// Mark as ended.
+								touch.ended = true;
 
-				// End (touchend).
-					var onTouchEnd = function(event) {
+							// Get position.
+								var pos = fixPos(
+									touch,
+									event.originalEvent.changedTouches[0].pageX,
+									event.originalEvent.changedTouches[0].pageY
+								);
 
-						var	$element = $(this),
-							touch = getTouch($element, $this, settings);
+							// End.
+								touch.doEnd(
+									event,
+									pos.x,
+									pos.y
+								);
 
-						// Mark as ended.
-							touch.ended = true;
+							// Clear ended after delay.
+								setTimeout(function() {
+									touch.ended = false;
+								}, 1000);
 
-						// Get position.
-							var pos = fixPos(
-								touch,
-								event.originalEvent.changedTouches[0].pageX,
-								event.originalEvent.changedTouches[0].pageY
-							);
+						};
 
-						// End.
-							touch.doEnd(
-								event,
-								pos.x,
-								pos.y
-							);
+						// Bind event.
+							$this.on('touchend', onTouchEnd);
 
-						// Clear ended after delay.
-							setTimeout(function() {
-								touch.ended = false;
-							}, 1000);
+						// Delegate?
+							if (settings.delegateSelector)
+								$this.on('touchend', settings.delegateSelector, onTouchEnd);
 
-					};
+				}
 
-					// Bind event.
-						$this.on('touchend', onTouchEnd);
-
-					// Delegate?
-						if (settings.delegateSelector)
-							$this.on('touchend', settings.delegateSelector, onTouchEnd);
-
-			// If useMouse is enabled, bind mouse events as well.
+			// Bind mouse events.
 				if (settings.useMouse) {
 
 					// Start (mousedown).
