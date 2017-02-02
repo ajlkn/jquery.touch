@@ -104,12 +104,6 @@
 				t.started = false;
 				t.ended = false;
 
-			// Hack: Turn off useMouse if the device supports touch events. Temporary solution, as this may break things in environments with mixed input types (mouse + touch).
-			/*
-				if (!!('ontouchstart' in window))
-					t.settings.useMouse = false;
-			*/
-
 		}
 
 		/**
