@@ -101,6 +101,8 @@
 				t.y = null;
 				t.ex = null;
 				t.ey = null;
+				t.xStart = null;
+				t.yStart = null;
 				t.exStart = null;
 				t.eyStart = null;
 				t.taps = 0;
@@ -158,6 +160,8 @@
 			t.inDrag = false;
 			t.tapStart = null;
 			t.dragStart = null;
+			t.xStart = null;
+			t.yStart = null;
 			t.exStart = null;
 			t.eyStart = null;
 
@@ -320,6 +324,8 @@
 							'y': y,
 							'ex': x - offset.left,
 							'ey': y - offset.top,
+							'xStart': t.xStart,
+							'yStart': t.yStart,
 							'exStart': t.exStart,
 							'eyStart': t.eyStart,
 							'event': event
@@ -487,6 +493,8 @@
 						t.dragStart = Date.now();
 
 					// Set starting element coordinates.
+						t.xStart = x;
+						t.yStart = y;
 						t.exStart = x - offset.left;
 						t.eyStart = y - offset.top;
 
@@ -498,8 +506,8 @@
 						t.$element.trigger(
 							'dragStart',
 							{
-								'x': x,
-								'y': y,
+								'x': t.xStart,
+								'y': t.yStart,
 								'ex': t.exStart,
 								'ey': t.eyStart,
 								'event': event
