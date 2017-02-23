@@ -57,6 +57,9 @@
 			// - false                               No filtering.
 				dropFilter: false,
 
+			// Coordinate point of reference (page, screen, client).
+				coordinates: 'page',
+
 			// Prevent or allow default actions for certain event classes. Can be any of the following:
 			// - true                                Prevent default actions for this event class.
 			// - false                               Allow default actions for this event class.
@@ -828,8 +831,8 @@
 							// Start.
 								touch.doStart(
 									event,
-									event.originalEvent.touches[0].pageX,
-									event.originalEvent.touches[0].pageY
+									event.originalEvent.touches[0][settings.coordinates + 'X'],
+									event.originalEvent.touches[0][settings.coordinates + 'Y']
 								);
 
 							// Clear started after delay.
@@ -853,8 +856,8 @@
 								touch = getTouch($element, $this, settings);
 
 							// Get coordinates.
-								var	x = event.originalEvent.touches[0].pageX,
-									y = event.originalEvent.touches[0].pageY;
+								var	x = event.originalEvent.touches[0][settings.coordinates + 'X'],
+									y = event.originalEvent.touches[0][settings.coordinates + 'Y'];
 
 							// Normalize coordinates?
 								if (touch.settings.trackDocument
@@ -899,8 +902,8 @@
 							// Get position.
 								var pos = fixPos(
 									touch,
-									event.originalEvent.changedTouches[0].pageX,
-									event.originalEvent.changedTouches[0].pageY
+									event.originalEvent.changedTouches[0][settings.coordinates + 'X'],
+									event.originalEvent.changedTouches[0][settings.coordinates + 'Y']
 								);
 
 							// End.
@@ -946,8 +949,8 @@
 							// Start.
 								touch.doStart(
 									event,
-									event.pageX,
-									event.pageY
+									event[settings.coordinates + 'X'],
+									event[settings.coordinates + 'Y']
 								);
 
 						};
@@ -969,8 +972,8 @@
 								if (touch.mouseDown)
 									touch.doMove(
 										event,
-										event.pageX,
-										event.pageY
+										event[settings.coordinates + 'X'],
+										event[settings.coordinates + 'Y']
 									);
 
 						};
@@ -999,8 +1002,8 @@
 							// End.
 								touch.doEnd(
 									event,
-									event.pageX,
-									event.pageY
+									event[settings.coordinates + 'X'],
+									event[settings.coordinates + 'Y']
 								);
 
 							// Clear mouse down.
@@ -1027,8 +1030,8 @@
 
 							touch.doEnd(
 								event,
-								event.pageX,
-								event.pageY
+								event[settings.coordinates + 'X'],
+								event[settings.coordinates + 'Y']
 							);
 
 							touch.mouseDown = false;
@@ -1103,8 +1106,8 @@
 					&&	t.settings.trackDocument) {
 
 						// Get coordinates.
-							var	x = event.pageX,
-								y = event.pageY;
+							var	x = event[t.settings.coordinates + 'X'],
+								y = event[t.settings.coordinates + 'Y'];
 
 						// Normalize coordinates?
 							if (t.settings.trackDocumentNormalize) {
@@ -1142,13 +1145,13 @@
 							if (typeof previousEvent !== 'undefined')
 								event = previousEvent;
 
-						// No pageX in event? "mouseup" likely already handled by originating element, so bail.
-							if (!('pageX' in event))
+						// No X coordinate in event? "mouseup" likely already handled by originating element, so bail.
+							if (!((t.settings.coordinates + 'X') in event))
 								return;
 
 						// Get coordinates.
-							var	x = event.pageX,
-								y = event.pageY;
+							var	x = event[t.settings.coordinates + 'X'],
+								y = event[t.settings.coordinates + 'Y'];
 
 						// Normalize coordinates?
 							if (t.settings.trackDocumentNormalize) {
