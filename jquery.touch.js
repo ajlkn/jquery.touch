@@ -57,6 +57,9 @@
 			// - false                               No filtering.
 				dropFilter: false,
 
+			// If true, traverses through parents for a match when dropFilter is a selector or function.
+				dropFilterTraversal: true,
+
 			// Coordinate point of reference (page, screen, client).
 				coordinates: 'page',
 
@@ -370,16 +373,51 @@
 
 												// Selector.
 													case 'string':
-														if (!$(e).is(t.settings.dropFilter))
-															e = null;
+
+														// Drop filter traversal enabled? Go through parents until we find a match (or don't).
+															if (t.settings.dropFilterTraversal) {
+
+																while (e) {
+
+																	// Found a match? Stop traversing.
+																		if ($(e).is(t.settings.dropFilter))
+																			break;
+
+																	// Traverse up to parent.
+																		e = e.parentElement;
+
+																}
+
+															}
+
+														// Otherwise, perform single match.
+															else if (!$(e).is(t.settings.dropFilter))
+																e = null;
 
 														break;
 
 												// Callback.
 													case 'function':
 
-														if ((t.settings.dropFilter)(t.$element[0], e) === false)
-															e = null;
+														// Drop filter traversal enabled? Go through parents until we find a match (or don't).
+															if (t.settings.dropFilterTraversal) {
+
+																while (e) {
+
+																	// Found a match? Stop traversing.
+																		if ((t.settings.dropFilter)(t.$element[0], e) === true)
+																			break;
+
+																	// Traverse up to parent.
+																		e = e.parentElement;
+
+																}
+
+															}
+
+														// Otherwise, perform single match.
+															else if ((t.settings.dropFilter)(t.$element[0], e) === false)
+																e = null;
 
 														break;
 
