@@ -330,11 +330,18 @@
 							'y': y,
 							'ex': x - offset.left,
 							'ey': y - offset.top,
-							'xStart': t.xStart,
-							'yStart': t.yStart,
-							'exStart': t.exStart,
-							'eyStart': t.eyStart,
-							'event': event
+							'start': {
+								'x': t.xStart,
+								'y': t.yStart,
+								'ex': t.exStart,
+								'ey': t.eyStart
+							},
+							'event': event,
+
+							// Deprecated.
+								'exStart': t.exStart,
+								'eyStart': t.eyStart,
+
 						}
 					);
 
