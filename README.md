@@ -138,6 +138,13 @@ e.touch({
   // - false                               No filtering.
     dropFilter: false,
 
+  // If true, traverses through parents for a match when dropFilter is a selector
+  // or function.
+    dropFilterTraversal: true,
+
+  // Coordinate point of reference (page, screen, client).
+    coordinates: 'page',
+
   // Prevent or allow default actions for certain event classes. Can be any of
   // the following:
   // - true                                Prevent default actions for this
@@ -190,8 +197,9 @@ And here's what you'll find in that object for each event:
 - `y`: Y position  (relative to document)
 - `ex`: X position (relative to element)
 - `ey`: Y position (relative to element)
-- `exStart`: X position of starting point (relative to element)
-- `eyStart`: Y position of starting point (relative to element)
+- `start`: `x`/`y`/`ex`/`ey` of starting point
+- `exStart`: (deprecated) X position of starting point (relative to element)
+- `eyStart`: (deprecated) Y position of starting point (relative to element)
 - `event`: Original event
 
 ### `dragEnd`
