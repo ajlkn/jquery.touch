@@ -1,4 +1,4 @@
-/* jquery.touch v1.1.0-dev | (c) @ajlkn | github.com/ajlkn/jquery.touch | MIT licensed */
+/* jquery.touch v1.1.0 | (c) @ajlkn | github.com/ajlkn/jquery.touch | MIT licensed */
 
 (function($) {
 
