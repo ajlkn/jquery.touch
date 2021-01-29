@@ -1,4 +1,4 @@
-/* jquery.touch v1.1.0 | (c) @ajlkn | github.com/ajlkn/jquery.touch | MIT licensed */
+/* jquery.touch v1.1.1 | (c) @ajlkn | github.com/ajlkn/jquery.touch | MIT licensed */
 
 (function($) {
 
@@ -130,17 +130,17 @@
 			switch (x) {
 
 				case 'swipe':
-					return (events.hasOwnProperty(x) || events.hasOwnProperty('swipeUp') || events.hasOwnProperty('swipeDown') || events.hasOwnProperty('swipeLeft') || events.hasOwnProperty('swipeRight'));
+					return (Object.prototype.hasOwnProperty.call(events, x) || Object.prototype.hasOwnProperty.call(events, 'swipeUp') || Object.prototype.hasOwnProperty.call(events, 'swipeDown') || Object.prototype.hasOwnProperty.call(events, 'swipeLeft') || Object.prototype.hasOwnProperty.call(events, 'swipeRight'));
 
 				case 'drag':
-					return (events.hasOwnProperty(x) || events.hasOwnProperty('dragStart') || events.hasOwnProperty('dragEnd'));
+					return (Object.prototype.hasOwnProperty.call(events, x) || Object.prototype.hasOwnProperty.call(events, 'dragStart') || Object.prototype.hasOwnProperty.call(events, 'dragEnd'));
 
 				case 'tapAndHold':
 				case 'doubleTap':
-					return events.hasOwnProperty(x);
+					return Object.prototype.hasOwnProperty.call(events, x);
 
 				case 'tap':
-					return (events.hasOwnProperty(x) || events.hasOwnProperty('doubleTap') || events.hasOwnProperty('tapAndHold'));
+					return (Object.prototype.hasOwnProperty.call(events, x) || Object.prototype.hasOwnProperty.call(events, 'doubleTap') || Object.prototype.hasOwnProperty.call(events, 'tapAndHold'));
 
 				default:
 					break;
